@@ -1,0 +1,190 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo">
+      <span class="logo-m">M</span><span class="logo-lk">LK</span>
+    </div>
+    <h1>MLK Shop</h1>
+    <p class="subtitle">Modern E-Commerce Platform</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="activeTab === 'login'"
+        (click)="switchTab('login')"
+      >
+        Login
+      </button>
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="activeTab === 'register'"
+        (click)="switchTab('register')"
+      >
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN TAB -->
+    @if (activeTab === 'login') {
+      @if (error) {
+        <div class="error-message">{{ error }}</div>
+      }
+
+      <form (ngSubmit)="login()" class="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            [(ngModel)]="username"
+            name="username"
+            placeholder="Enter username"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-input-wrapper">
+            <input
+              [type]="showLoginPassword ? 'text' : 'password'"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Enter password"
+              [disabled]="loading"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="toggleLoginPassword()"
+              [disabled]="loading"
+              title="Toggle password visibility"
+            >
+              @if (showLoginPassword) {
+                <span>👁️</span>
+              } @else {
+                <span>👁️‍🗨️</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" [disabled]="loading">
+          @if (loading) {
+            <span>Logging in...</span>
+          } @else {
+            <span>Login</span>
+          }
+        </button>
+      </form>
+
+      <div class="demo-credentials">
+        <h3>Demo Credentials</h3>
+        <p><strong>User:</strong> username: user | password: user</p>
+        <p><strong>Admin:</strong> username: admin | password: admin</p>
+      </div>
+    }
+
+    <!-- REGISTER TAB -->
+    @if (activeTab === 'register') {
+      @if (registerError) {
+        <div class="error-message">{{ registerError }}</div>
+      }
+
+      @if (registerSuccess) {
+        <div class="success-message">{{ registerSuccess }}</div>
+      }
+
+      <form (ngSubmit)="register()" class="register-form">
+        <div class="form-group">
+          <label for="reg-username">Username</label>
+          <input
+            type="text"
+            id="reg-username"
+            [(ngModel)]="registerUsername"
+            name="registerUsername"
+            placeholder="Choose username"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input
+            type="email"
+            id="reg-email"
+            [(ngModel)]="registerEmail"
+            name="registerEmail"
+            placeholder="Enter email"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="password-input-wrapper">
+            <input
+              [type]="showRegisterPassword ? 'text' : 'password'"
+              id="reg-password"
+              [(ngModel)]="registerPassword"
+              name="registerPassword"
+              placeholder="Enter password"
+              [disabled]="loading"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="toggleRegisterPassword()"
+              [disabled]="loading"
+              title="Toggle password visibility"
+            >
+              @if (showRegisterPassword) {
+                <span>👁️</span>
+              } @else {
+                <span>👁️‍🗨️</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-confirm">Confirm Password</label>
+          <div class="password-input-wrapper">
+            <input
+              [type]="showRegisterConfirm ? 'text' : 'password'"
+              id="reg-confirm"
+              [(ngModel)]="registerConfirmPassword"
+              name="registerConfirmPassword"
+              placeholder="Confirm password"
+              [disabled]="loading"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="toggleRegisterConfirm()"
+              [disabled]="loading"
+              title="Toggle password visibility"
+            >
+              @if (showRegisterConfirm) {
+                <span>👁️</span>
+              } @else {
+                <span>👁️‍🗨️</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" [disabled]="loading">
+          @if (loading) {
+            <span>Creating account...</span>
+          } @else {
+            <span>Create Account</span>
+          }
+        </button>
+      </form>
+    }
+  </div>
+</div>

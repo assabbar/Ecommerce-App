@@ -1,0 +1,139 @@
+<div class="admin-dashboard">
+  <!-- Confirmation Modal -->
+  <app-confirm-modal></app-confirm-modal>
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <div class="header-actions">
+      <button class="btn-back" routerLink="/">← Home</button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-icons">inventory_2</span></div>
+      <div class="stat-info">
+        <h3>{{ totalProducts }}</h3>
+        <p>Total Products</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-icons">warning</span></div>
+      <div class="stat-info">
+        <h3>{{ lowStockProducts }}</h3>
+        <p>Low Stock</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-icons">shopping_cart</span></div>
+      <div class="stat-info">
+        <h3>{{ totalOrders }}</h3>
+        <p>Orders</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-header">
+    <div class="tabs">
+      <button 
+        class="tab" 
+        [class.active]="selectedTab === 'products'"
+        (click)="selectTab('products')">
+        <span class="material-icons">list</span> Product List
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="selectedTab === 'inventory'"
+        (click)="selectTab('inventory')">
+        <span class="material-icons">storage</span> Inventory
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="selectedTab === 'orders'"
+        (click)="selectTab('orders')">
+        <span class="material-icons">receipt</span> Orders
+      </button>
+    </div>
+    <button class="btn-add-product" title="Add New Product" routerLink="/add-product">
+      <span class="plus-icon">+</span>
+    </button>
+  </div>
+
+  <!-- Products List Tab -->
+  <div class="tab-content" *ngIf="selectedTab === 'products'">
+    <div class="products-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products">
+            <td>
+              <img [src]="product.coverImage || product.image || 'assets/placeholder.png' | apiUrl" 
+                   alt="{{ product.name }}" 
+                   class="product-thumb">
+            </td>
+            <td><span class="sku-badge">{{ product.skuCode }}</span></td>
+            <td class="product-name">{{ product.name }}</td>
+            <td><span class="category-badge">{{ product.category }}</span></td>
+            <td class="price">€{{ product.price }}</td>
+            <td>
+              <span class="stock-badge" [class.low]="isLowStock(product.inStock)">
+                {{ product.inStock || 0 }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon" title="Edit" (click)="editProduct(product)">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon" title="View Stock" (click)="viewInventory(product)">
+                  <span class="material-icons">inventory_2</span>
+                </button>
+                <button class="btn-icon btn-danger" title="Delete" (click)="product.id && deleteProduct(product.id, product.name)">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div *ngIf="products.length === 0" class="no-products">
+        <p>No products found</p>
+        <button class="btn-primary" (click)="selectTab('add-product')">>
+          Ajouter un produit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Tab -->
+  <div class="tab-content" *ngIf="selectedTab === 'inventory'">
+    <div class="inventory-view">
+      <h2>Gestion de l'Inventaire</h2>
+      <p>Fonctionnalité en cours de développement...</p>
+      <p>Affichera les stocks pour chaque produit depuis inventory-service</p>
+    </div>
+  </div>
+
+  <!-- Orders Tab -->
+  <div class="tab-content" *ngIf="selectedTab === 'orders'">
+    <div class="orders-view">
+      <h2>Gestion des Commandes</h2>
+      <p>Fonctionnalité en cours de développement...</p>
+      <p>Affichera toutes les commandes depuis order-service</p>
+    </div>
+  </div>
+</div>

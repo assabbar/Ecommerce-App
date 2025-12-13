@@ -1,0 +1,102 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.4)
+
+2025-12-10T17:17:46.259+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] c.t.m.i.InventoryServiceApplication      : Starting InventoryServiceApplication v1.0-SNAPSHOT using Java 21.0.9 with PID 10725 (/home/josh/Malak_Josh/backend/inventory-service/target/inventory-service-1.0-SNAPSHOT.jar started by josh in /home/josh/Malak_Josh)
+2025-12-10T17:17:46.345+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] c.t.m.i.InventoryServiceApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-12-10T17:17:56.911+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-10T17:17:57.312+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 351 ms. Found 1 JPA repository interface.
+2025-12-10T17:18:04.725+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2025-12-10T17:18:04.804+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-10T17:18:04.812+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-12-10T17:18:05.006+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-10T17:18:05.012+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 15464 ms
+2025-12-10T17:18:09.133+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-10T17:18:11.546+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1f293cb7
+2025-12-10T17:18:11.562+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-10T17:18:13.598+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.f.c.internal.license.VersionPrinter    : Flyway Community Edition 9.22.3 by Redgate
+2025-12-10T17:18:13.606+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.f.c.internal.license.VersionPrinter    : See release notes here: https://rd.gt/416ObMi
+2025-12-10T17:18:13.610+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.f.c.internal.license.VersionPrinter    : 
+2025-12-10T17:18:13.808+01:00  INFO 10725 --- [inventory-service] [           main] [69399d450376327625e5afd203602694-25e5afd203602694] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:3306/inventory_service (MySQL 8.3)
+2025-12-10T17:18:13.991+01:00  WARN 10725 --- [inventory-service] [           main] [69399d450376327625e5afd203602694-25e5afd203602694] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: MySQL 8.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.0.
+2025-12-10T17:18:14.251+01:00  INFO 10725 --- [inventory-service] [           main] [69399d450376327625e5afd203602694-25e5afd203602694] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.194s)
+2025-12-10T17:18:14.472+01:00  INFO 10725 --- [inventory-service] [           main] [69399d450376327625e5afd203602694-25e5afd203602694] o.f.core.internal.command.DbMigrate      : Current version of schema `inventory_service`: 2
+2025-12-10T17:18:14.495+01:00  INFO 10725 --- [inventory-service] [           main] [69399d450376327625e5afd203602694-25e5afd203602694] o.f.core.internal.command.DbMigrate      : Schema `inventory_service` is up to date. No migration necessary.
+2025-12-10T17:18:15.285+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-10T17:18:15.626+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-12-10T17:18:15.844+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-10T17:18:17.360+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-10T17:18:20.854+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-10T17:18:20.870+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-10T17:18:22.984+01:00  WARN 10725 --- [inventory-service] [           main] [                                                 ] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-10T17:18:25.026+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 15 endpoint(s) beneath base path '/actuator'
+2025-12-10T17:18:25.171+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path ''
+2025-12-10T17:18:25.209+01:00  INFO 10725 --- [inventory-service] [           main] [                                                 ] c.t.m.i.InventoryServiceApplication      : Started InventoryServiceApplication in 48.222 seconds (process running for 53.051)
+2025-12-11T04:28:06.989+01:00  INFO 10725 --- [inventory-service] [ionShutdownHook] [                                                 ] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11T04:28:07.095+01:00  INFO 10725 --- [inventory-service] [ionShutdownHook] [                                                 ] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+04:28:07,174 |-ERROR in com.github.loki4j.client.pipeline.DefaultPipeline@3c52f959 - Error while sending Batch #223e1df80923 (645 bytes) to Loki (http://localhost:3100/loki/api/v1/push) java.net.ConnectException
+	at java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:955)
+	at 	at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133)
+	at 	at com.github.loki4j.client.http.JavaHttpClient.send(JavaHttpClient.java:68)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendBatch(DefaultPipeline.java:263)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendStep(DefaultPipeline.java:249)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.runSendLoop(DefaultPipeline.java:183)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.lambda$start$2(DefaultPipeline.java:108)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at 	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.common.Utils.toConnectException(Utils.java:1065)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:227)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.checkRetryConnect(PlainHttpConnection.java:280)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$2(PlainHttpConnection.java:238)
+	at 	at java.base/java.util.concurrent.CompletableFuture.uniHandle(CompletableFuture.java:934)
+	at 	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(CompletableFuture.java:911)
+	at 	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at 	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)
+	at 	... 3 common frames omitted
+Caused by: java.nio.channels.ClosedChannelException
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.ensureOpen(SocketChannelImpl.java:202)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.beginConnect(SocketChannelImpl.java:786)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:874)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$1(PlainHttpConnection.java:210)
+	at 	at java.base/java.security.AccessController.doPrivileged(AccessController.java:571)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:212)
+	at 	... 9 common frames omitted
+2025-12-11T04:28:10.458+01:00  INFO 10725 --- [inventory-service] [ionShutdownHook] [                                                 ] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+04:28:10,688 |-ERROR in com.github.loki4j.client.pipeline.DefaultPipeline@3c52f959 - Error while sending Batch #223ef05e2d76 (358 bytes) to Loki (http://localhost:3100/loki/api/v1/push) java.net.ConnectException
+	at java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:955)
+	at 	at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133)
+	at 	at com.github.loki4j.client.http.JavaHttpClient.send(JavaHttpClient.java:68)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendBatch(DefaultPipeline.java:263)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendStep(DefaultPipeline.java:249)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.runSendLoop(DefaultPipeline.java:183)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.lambda$start$2(DefaultPipeline.java:108)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at 	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.common.Utils.toConnectException(Utils.java:1065)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:227)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.checkRetryConnect(PlainHttpConnection.java:280)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$2(PlainHttpConnection.java:238)
+	at 	at java.base/java.util.concurrent.CompletableFuture.uniHandle(CompletableFuture.java:934)
+	at 	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(CompletableFuture.java:911)
+	at 	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at 	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)
+	at 	... 3 common frames omitted
+Caused by: java.nio.channels.ClosedChannelException
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.ensureOpen(SocketChannelImpl.java:202)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.beginConnect(SocketChannelImpl.java:786)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:874)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$1(PlainHttpConnection.java:210)
+	at 	at java.base/java.security.AccessController.doPrivileged(AccessController.java:571)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:212)
+	at 	... 9 common frames omitted

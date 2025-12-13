@@ -1,0 +1,226 @@
+/* Home Page - MLK E-commerce Design (Screen 2) */
+.home-page {
+  background: white;
+  min-height: calc(100vh - 150px);
+}
+
+/* ADMIN HOME PAGE */
+.admin-home {
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: calc(100vh - 150px);
+}
+
+.admin-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 60px;
+}
+
+.admin-header h1 {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+}
+
+.admin-header p {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.action-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.action-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.action-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 40px;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.stat-number {
+  display: block;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Page Title Section */
+.page-title-section {
+  background: white;
+  padding: 24px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.page-title-section .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.create-product-btn {
+  background: #7c3aed;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.create-product-btn:hover {
+  background: #6d28d9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+/* Messages */
+.success-message,
+.error-message {
+  max-width: 1400px;
+  margin: 16px auto;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+/* Products Grid */
+.products-grid {
+  margin: 32px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* No Products */
+.no-products {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.no-products h2 {
+  font-size: 28px;
+  margin: 0 0 8px 0;
+}
+
+.no-products p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-section .container {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+}

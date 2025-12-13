@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+
+    environment {
+        BACKEND_DIR = 'backend'
+        FRONTEND_DIR = 'frontend'
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    echo '====== Checking out code from GitHub ======'
+                    checkout scm
+                }
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                script {
+                    echo '====== Building Backend Services ======'
+                    sh '''
+                        cd ${BACKEND_DIR}
+                        # Build all microservices with Maven
+                        mvn clean package -DskipTests -q
+                        echo "Backend build completed successfully!"
+                    '''
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                script {
+                    echo '====== Building Frontend ======'
+                    sh '''
+                        cd ${FRONTEND_DIR}
+                        npm install
+                        npm run build
+                        echo "Frontend build completed successfully!"
+                    '''
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo '====== Building Docker Images ======'
+                    sh '''
+                        # Build images for all services
+                        docker compose build
+                        echo "Docker images built successfully!"
+                    '''
+                }
+            }
+        }
+
+        stage('Start Services') {
+            steps {
+                script {
+                    echo '====== Starting Docker Services ======'
+                    sh '''
+                        docker compose up -d
+                        echo "Services started successfully!"
+                        sleep 10
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                script {
+                    echo '====== Checking Service Health ======'
+                    sh '''
+                        # Check if API Gateway is responsive
+                        for i in {1..30}; do
+                            if curl -f http://localhost:9000/api/product > /dev/null 2>&1; then
+                                echo "API Gateway is healthy!"
+                                break
+                            fi
+                            echo "Attempt $i: Waiting for API Gateway..."
+                            sleep 2
+                        done
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo '====== Pipeline Cleanup ======'
+                // Optionally stop services after testing
+                // sh 'docker compose down'
+            }
+        }
+        success {
+            echo '✓ Pipeline executed successfully!'
+        }
+        failure {
+            echo '✗ Pipeline failed!'
+            sh 'docker compose logs' || true
+        }
+    }
+}

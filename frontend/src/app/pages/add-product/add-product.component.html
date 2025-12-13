@@ -1,0 +1,223 @@
+<div class="add-product-container">
+  <div class="header">
+    <h2>Add New Product</h2>
+    @if (productCreated) {
+      <div class="success-message">✓ Product Created Successfully</div>
+    }
+  </div>
+
+  <form [formGroup]="addProductForm" (ngSubmit)="onSubmit()" class="product-form">
+    <div class="form-grid">
+      <!-- Left Column: Basic Info -->
+      <div class="form-section">
+        <h3>Product Information</h3>
+        
+        <div class="form-group">
+          <label for="skuCode">SKU Code *</label>
+          <input
+            type="text"
+            id="skuCode"
+            formControlName="skuCode"
+            placeholder="e.g., SKU-12345"
+          />
+          <div *ngIf="skuCode?.invalid && (skuCode?.dirty || skuCode?.touched)" class="error">
+            <div *ngIf="skuCode?.errors?.['required']">SKU Code is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Product Name *</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            placeholder="Enter product name"
+          />
+          <div *ngIf="name?.invalid && (name?.dirty || name?.touched)" class="error">
+            <div *ngIf="name?.errors?.['required']">Name is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select id="category" formControlName="category">
+            <option value="Fashion">Fashion</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Home">Home</option>
+            <option value="Sports">Sports</option>
+            <option value="Books">Books</option>
+            <option value="Beauty">Beauty & Care</option>
+            <option value="Automotive">Automotive</option>
+            <option value="Women">Women</option>
+            <option value="Men">Men</option>
+            <option value="Kids">Kids</option>
+            <option value="Jewelry">Jewelry & Watches</option>
+          </select>
+          <div *ngIf="category?.invalid && (category?.dirty || category?.touched)" class="error">
+            <div *ngIf="category?.errors?.['required']">Category is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="5"
+            placeholder="Describe your product..."
+          ></textarea>
+          <div *ngIf="description?.invalid && (description?.dirty || description?.touched)" class="error">
+            <div *ngIf="description?.errors?.['required']">Description is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="price">Price (€) *</label>
+          <input
+            type="number"
+            id="price"
+            formControlName="price"
+            step="0.01"
+            placeholder="0.00"
+          />
+          <div *ngIf="price?.invalid && (price?.dirty || price?.touched)" class="error">
+            <div *ngIf="price?.errors?.['required']">Price is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inStock">Stock Quantity *</label>
+          <input
+            type="number"
+            id="inStock"
+            formControlName="inStock"
+            placeholder="0"
+            min="0"
+          />
+          <div *ngIf="inStock?.invalid && (inStock?.dirty || inStock?.touched)" class="error">
+            <div *ngIf="inStock?.errors?.['required']">Stock quantity is required</div>
+            <div *ngIf="inStock?.errors?.['min']">Stock must be 0 or greater</div>
+          </div>
+        </div>
+
+        <!-- Colors Section -->
+        <div class="form-group">
+          <label>Product Colors</label>
+          <div class="color-input-group">
+            <input
+              type="color"
+              [(ngModel)]="newColor"
+              [ngModelOptions]="{standalone: true}"
+              class="color-input"
+              title="Choose a color"
+            />
+            <button type="button" (click)="addColor()" class="btn-add-color">
+              Add Color
+            </button>
+          </div>
+          <div class="colors-list">
+            @for (color of colors; track color; let i = $index) {
+              <div class="color-tag">
+                <span class="color-swatch" [style.background-color]="color"></span>
+                <span class="color-value">{{ color }}</span>
+                <button type="button" (click)="removeColor(i)" class="btn-remove">×</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Sizes Section -->
+        <div class="form-group">
+          <label>Available Sizes</label>
+          <input
+            type="text"
+            [(ngModel)]="newSize"
+            [ngModelOptions]="{standalone: true}"
+            placeholder="e.g., L, XL"
+            class="size-input"
+          />
+          <div class="size-input-group" style="margin-top: 8px;">
+            <button type="button" (click)="addSize()" class="btn-add-size">
+              Add Size
+            </button>
+          </div>
+          <div class="sizes-list">
+            @for (size of sizes; track size; let i = $index) {
+              <div class="size-tag">
+                <span>{{ size }}</span>
+                <button type="button" (click)="removeSize(i)" class="btn-remove">×</button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Images -->
+      <div class="form-section">
+        <h3>Product Images</h3>
+        
+        <div class="upload-area">
+          <input
+            type="file"
+            id="imageUpload"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            multiple
+            hidden
+          />
+          <label for="imageUpload" class="upload-label">
+            <span class="upload-icon">📷</span>
+            <span class="upload-text">Click to upload images</span>
+            <span class="upload-hint">Support multiple images (JPG, PNG)</span>
+          </label>
+        </div>
+
+        @if (selectedImages.length > 0) {
+          <div class="images-preview">
+            <p class="preview-title">Selected Images ({{ selectedImages.length }})</p>
+            <div class="images-grid">
+              @for (image of selectedImages; track image.url; let i = $index) {
+                <div class="image-preview-item" [class.is-cover]="image.isCover">
+                  <img [src]="image.url" [alt]="'Preview ' + i">
+                  <div class="image-actions">
+                    @if (image.isCover) {
+                      <span class="cover-badge">Cover Image</span>
+                    } @else {
+                      <button type="button" (click)="setCoverImage(i)" class="set-cover-btn">
+                        Set as Cover
+                      </button>
+                    }
+                    <button type="button" (click)="removeImage(i)" class="remove-btn">
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-cancel"
+        routerLink="/"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="addProductForm.invalid || selectedImages.length === 0 || isSubmitting"
+      >
+        @if (isSubmitting) {
+          <span>Creating...</span>
+        } @else {
+          <span>Create Product</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,319 @@
+/* Header Styling - MLK E-commerce Design (Screen 2) */
+.header {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Top Header */
+.top-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Logo */
+.logo {
+  font-size: 32px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+}
+
+.logo-m {
+  color: #000000;
+}
+
+.logo-l {
+  color: #7c3aed;
+}
+
+.logo-k {
+  color: #000000;
+  margin-left: -4px;
+}
+
+.logo:hover {
+  opacity: 0.85;
+}
+
+/* Search Bar */
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f8f8ff;
+  border: 2px solid #e8e8ff;
+  border-radius: 8px;
+  padding: 0 16px;
+  gap: 8px;
+  max-width: 600px;
+}
+
+.search-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+}
+
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  outline: none;
+}
+
+.search-bar input::placeholder {
+  color: #999;
+}
+
+/* Header Menu */
+.header-menu {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: auto;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: #1a1a1a;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.menu-item .icon {
+  font-size: 24px;
+}
+
+.menu-item .icon.material-icons {
+  font-size: 28px;
+  line-height: 28px;
+  height: 28px;
+  width: 28px;
+}
+
+.menu-item .label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.menu-item:hover {
+  color: #7c3aed;
+  transform: translateY(-2px);
+}
+
+/* Admin Link - Special Style */
+.menu-item.admin-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.menu-item.admin-link:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.menu-item.admin-link .icon {
+  font-size: 18px;
+}
+
+.menu-item.admin-link .label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Favorites Link - Purple Style */
+.menu-item.favorites-link .icon {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.menu-item.favorites-link:hover {
+  color: #7c3aed;
+}
+
+.menu-item.favorites-link:hover .icon {
+  color: #6d28d9;
+}
+
+/* Cart Badge */
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #7c3aed;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Auth Buttons */
+.logout-btn,
+.login-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #1a1a1a;
+}
+
+.logout-btn:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+}
+
+.login-btn {
+  background: #7c3aed;
+  color: white;
+  border: none;
+}
+
+.login-btn:hover {
+  background: #6d28d9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+/* Favorites Link - Purple Style */
+.menu-item.favorites-link .icon {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.menu-item.favorites-link:hover {
+  color: #7c3aed;
+}
+
+.menu-item.favorites-link:hover .icon {
+  color: #6d28d9;
+}
+
+/* Cart Badge */
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #7c3aed;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Categories Navigation */
+.categories-nav {
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  padding: 8px 0;
+}
+
+.categories-nav .header-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 20px;
+}
+
+.categories-nav .header-container::-webkit-scrollbar {
+  height: 3px;
+}
+
+.categories-nav .header-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.categories-nav .header-container::-webkit-scrollbar-thumb {
+  background: #7c3aed;
+  border-radius: 10px;
+}
+
+.category-item {
+  padding: 8px 20px;
+  background: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+}
+
+.category-item:hover {
+  color: #7c3aed;
+  background: #f8f8ff;
+}
+
+.category-item.active {
+  background: #7c3aed;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-container {
+    flex-wrap: wrap;
+  }
+  
+  .search-bar {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .header-menu {
+    gap: 12px;
+  }
+  
+  .menu-item .label {
+    display: none;
+  }
+}

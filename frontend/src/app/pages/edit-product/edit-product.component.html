@@ -1,0 +1,240 @@
+<div class="edit-product-page" *ngIf="!loading && product && !error">
+  <div class="container">
+    <!-- Success Message Toast -->
+    @if (successMessage) {
+      <div class="success-toast">
+        {{ successMessage }}
+      </div>
+    }
+
+    <!-- Back Button -->
+    <button class="back-button" (click)="goBack()">
+      ← Back to Dashboard
+    </button>
+
+    <div class="edit-header">
+      <h1>Edit Product</h1>
+      <p>Update product details and images</p>
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form">
+      <div class="form-grid">
+        <!-- Left Column: Form Fields -->
+        <div class="form-column">
+          <!-- Product Name -->
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input 
+              type="text" 
+              formControlName="name"
+              class="form-input"
+              placeholder="Enter product name">
+            <span class="error-text" *ngIf="editForm.get('name')?.hasError('required') && editForm.get('name')?.touched">
+              Product name is required
+            </span>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea 
+              formControlName="description"
+              class="form-textarea"
+              placeholder="Enter product description"
+              rows="4"></textarea>
+            <span class="error-text" *ngIf="editForm.get('description')?.hasError('required') && editForm.get('description')?.touched">
+              Description is required
+            </span>
+          </div>
+
+          <!-- Price -->
+          <div class="form-group">
+            <label>Price (EUR) *</label>
+            <input 
+              type="number" 
+              formControlName="price"
+              class="form-input"
+              placeholder="Enter price"
+              step="0.01">
+            <span class="error-text" *ngIf="editForm.get('price')?.hasError('required') && editForm.get('price')?.touched">
+              Price is required
+            </span>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label>Category *</label>
+            <select formControlName="category" class="form-select">
+              <option value="">Select a category</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing</option>
+              <option value="accessories">Accessories</option>
+              <option value="home">Home & Garden</option>
+              <option value="sports">Sports</option>
+              <option value="books">Books</option>
+            </select>
+            <span class="error-text" *ngIf="editForm.get('category')?.hasError('required') && editForm.get('category')?.touched">
+              Category is required
+            </span>
+          </div>
+
+          <!-- Stock -->
+          <div class="form-group">
+            <label>Stock Quantity *</label>
+            <input 
+              type="number" 
+              formControlName="inStock"
+              class="form-input"
+              placeholder="Enter stock quantity">
+            <span class="error-text" *ngIf="editForm.get('inStock')?.hasError('required') && editForm.get('inStock')?.touched">
+              Stock quantity is required
+            </span>
+          </div>
+
+          <!-- Colors -->
+          <div class="form-group">
+            <label>Colors (comma-separated)</label>
+            <input 
+              type="text" 
+              formControlName="colors"
+              class="form-input"
+              placeholder="e.g., #FF0000, #00FF00, #0000FF">
+          </div>
+
+          <!-- Sizes -->
+          <div class="form-group">
+            <label>Sizes (comma-separated)</label>
+            <input 
+              type="text" 
+              formControlName="sizes"
+              class="form-input"
+              placeholder="e.g., S, M, L, XL">
+          </div>
+        </div>
+
+        <!-- Right Column: Images -->
+        <div class="form-column">
+          <!-- Current Images -->
+          <div class="form-group">
+            <label>Current Images</label>
+            <div class="images-grid">
+              @for (img of selectedImages; track $index) {
+                <div class="image-card">
+                  <img [src]="img | apiUrl" [alt]="'Current image ' + $index">
+                  <button 
+                    type="button"
+                    class="remove-btn"
+                    (click)="removeImage($index)">
+                    ✕
+                  </button>
+                </div>
+              }
+              @if (selectedImages.length === 0) {
+                <p class="no-images">No current images</p>
+              }
+            </div>
+          </div>
+
+          <!-- Add New Images -->
+          <div class="form-group">
+            <label>Add New Images</label>
+            <div class="upload-area">
+              <input 
+                type="file"
+                multiple
+                accept="image/*"
+                (change)="onImageSelected($event)"
+                #imageInput
+                hidden>
+              <button 
+                type="button"
+                class="upload-btn"
+                (click)="imageInput.click()">
+                📁 Choose Images
+              </button>
+              <p class="upload-hint">or drag and drop images here</p>
+            </div>
+
+            <!-- New Images Preview -->
+            @if (newImagesBase64.length > 0) {
+              <div class="images-grid" style="margin-top: 16px;">
+                @for (img of newImagesBase64; track $index) {
+                  <div class="image-card new-image">
+                    <img [src]="img" [alt]="'New image ' + $index">
+                    <button 
+                      type="button"
+                      class="remove-btn"
+                      (click)="removeNewImage($index)">
+                      ✕
+                    </button>
+                    <span class="new-badge">New</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Cover Image -->
+          <div class="form-group">
+            <label>Cover Image</label>
+            <div class="upload-area">
+              <input 
+                type="file"
+                accept="image/*"
+                (change)="onCoverImageSelected($event)"
+                #coverInput
+                hidden>
+              <button 
+                type="button"
+                class="upload-btn"
+                (click)="coverInput.click()">
+                📸 Choose Cover Image
+              </button>
+              <p class="upload-hint">Select the main product image</p>
+            </div>
+
+            @if (coverImageFile) {
+              <div class="cover-image-preview">
+                <p>Cover image selected: {{ coverImageFile.name }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-alert" *ngIf="error">
+        <span>⚠️ {{ error }}</span>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="form-actions">
+        <button 
+          type="button"
+          class="btn btn-secondary"
+          (click)="goBack()">
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="editForm.invalid">
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading product details...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="error && loading === false">
+  <h2>⚠️ Error</h2>
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" (click)="goBack()">← Back to Dashboard</button>
+</div>

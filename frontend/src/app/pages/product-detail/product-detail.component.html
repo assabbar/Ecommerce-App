@@ -1,0 +1,153 @@
+<div class="product-detail-page" *ngIf="!loading && product && !error">
+  <div class="container">
+    <!-- Back Button -->
+    <button class="back-button" (click)="goBack()">
+      ← Back to Products
+    </button>
+
+    <div class="product-detail-grid">
+      <!-- Left Side: Images -->
+      <div class="product-images">
+        <!-- Thumbnail Images -->
+        <div class="thumbnails">
+          @for (img of product.images || []; track img) {
+            <div class="thumbnail" 
+                 [class.active]="selectedImage === img"
+                 (click)="selectImage(img)">
+              <img [src]="img | apiUrl" [alt]="product.name">
+            </div>
+          }
+        </div>
+
+        <!-- Main Image -->
+        <div class="main-image">
+          <img [src]="selectedImage | apiUrl" [alt]="product.name">
+        </div>
+      </div>
+
+      <!-- Right Side: Product Info -->
+      <div class="product-info">
+        <!-- Brand/Category Badge -->
+        <div class="brand-badge">{{ product.category | uppercase }}</div>
+
+        <!-- Product Name -->
+        <h1 class="product-name">{{ product.name }}</h1>
+
+        <!-- Description -->
+        <p class="product-description">{{ product.description }}</p>
+
+        <!-- Rating -->
+        @if (product.rating) {
+          <div class="product-rating">
+            <div class="stars">
+              @for (i of [1,2,3,4,5]; track i) {
+                <span class="star" [class.filled]="i <= (product.rating || 0)">★</span>
+              }
+            </div>
+            <span class="review-count">({{ product.reviews }} Comments)</span>
+          </div>
+        }
+
+        <!-- Price -->
+        <div class="price-section">
+          <span class="price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <!-- Color Selection -->
+        @if (product.colors && product.colors.length > 0) {
+          <div class="selection-group">
+            <label class="selection-label">Color : {{ selectedColor }}</label>
+            <div class="color-options">
+              @for (color of product.colors; track color) {
+                <button class="color-btn"
+                        [class.active]="selectedColor === color"
+                        [style.background-color]="color"
+                        (click)="selectColor(color)">
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Size Selection -->
+        @if (product.sizes && product.sizes.length > 0) {
+          <div class="selection-group">
+            <label class="selection-label">Taille : 
+              <select [(ngModel)]="selectedSize" class="size-select">
+                @for (size of product.sizes; track size) {
+                  <option [value]="size">{{ size }}</option>
+                }
+              </select>
+            </label>
+            <div class="size-options">
+              @for (size of product.sizes; track size) {
+                <button class="size-btn"
+                        [class.active]="selectedSize === size"
+                        (click)="selectSize(size)">
+                  {{ size }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Quantity and Stock -->
+        <div class="quantity-section">
+          <div class="quantity-wrapper">
+            <div class="quantity-control">
+              <button (click)="decreaseQuantity()">−</button>
+              <input type="number" [(ngModel)]="quantity" [attr.max]="product.inStock || 1" min="1" readonly>
+              <button (click)="increaseQuantity()">+</button>
+            </div>
+            
+            @if ((product.inStock ?? 0) > 0) {
+              <div class="stock-info available">
+                <span class="hourglass-icon">⏳</span>
+                <span>Only {{ product.inStock }} items Left ! Don't miss it</span>
+              </div>
+            } @else {
+              <div class="stock-info unavailable">
+                Out of Stock
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="add-to-cart-btn" 
+                  (click)="addToCart()"
+                  [disabled]="(product.inStock ?? 0) <= 0">
+            Add To Cart
+          </button>
+          
+          <button class="favorite-btn" (click)="toggleFavorite()" [class.active]="isFavorite">
+            <span class="heart-icon">{{ isFavorite ? '❤️' : '♡' }}</span>
+          </button>
+
+          <button class="chat-btn">
+            <span class="chat-icon">💬</span>
+          </button>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="additional-info">
+          <button class="info-link">See what others think ?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading product details...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="error">
+  <h2>⚠️ Error</h2>
+  <p>{{ error }}</p>
+  <button class="btn-back" (click)="goBack()">← Back to Products</button>
+</div>

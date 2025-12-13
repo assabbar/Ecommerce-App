@@ -1,0 +1,102 @@
+<header class="header">
+  <!-- Top Header -->
+  <div class="top-header">
+    <div class="header-container">
+      <!-- Logo -->
+      <a routerLink="/" class="logo">
+        <span class="logo-m">M</span><span class="logo-l">L</span><span class="logo-k">K</span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <button class="search-icon">🔍</button>
+        <input type="text" placeholder="Search Product...">
+      </div>
+
+      <!-- Right Side Menu -->
+      <div class="header-menu">
+        <!-- Admin Dashboard (only for admins) -->
+        @if (isAdmin) {
+          <a routerLink="/admin" class="menu-item admin-link">
+            <span class="icon material-icons">settings</span>
+            <span class="label">Admin</span>
+          </a>
+        }
+
+        <!-- Account -->
+        <a class="menu-item">
+          <span class="icon material-icons">person</span>
+          <span class="label">Account</span>
+        </a>
+
+        <!-- Favourites (Hide for admins) -->
+        @if (!isAdmin) {
+          <a routerLink="/favorites" class="menu-item favorites-link">
+            <span class="icon">♡</span>
+            <span class="label">Favourites</span>
+          </a>
+        }
+
+        <!-- Cart (Hide for admins) -->
+        @if (!isAdmin) {
+          <a routerLink="/cart" class="menu-item cart-icon">
+            <span class="icon">🛒</span>
+            <span class="label">Cart</span>
+            @if (cartCount > 0) {
+              <span class="cart-count">{{ cartCount }}</span>
+            }
+          </a>
+        }
+
+        <!-- Auth Button -->
+        @if (isAuthenticated) {
+          <button (click)="logout()" type="button" class="logout-btn">
+            Logout
+          </button>
+        } @else {
+          <button (click)="login()" type="button" class="login-btn">
+            Login
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Navigation (only for non-admins) -->
+  @if (!isAdmin) {
+    <div class="categories-nav">
+      <div class="header-container">
+        <button class="category-item" [class.active]="selectedCategory === 'all'" (click)="selectCategory('all')">
+          All Categories
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Fashion'" (click)="selectCategory('Fashion')">
+          Fashion
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Beauty'" (click)="selectCategory('Beauty')">
+          Beauty & Care
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Electronics'" (click)="selectCategory('Electronics')">
+          Electronics
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Sports'" (click)="selectCategory('Sports')">
+          Sports
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Automotive'" (click)="selectCategory('Automotive')">
+          Automotive
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Women'" (click)="selectCategory('Women')">
+          Women
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Men'" (click)="selectCategory('Men')">
+          Men
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Kids'" (click)="selectCategory('Kids')">
+          Kids
+        </button>
+        <button class="category-item" [class.active]="selectedCategory === 'Jewelry'" (click)="selectCategory('Jewelry')">
+          Jewelry & Watches
+        </button>
+      </div>
+    </div>
+  }
+</header>

@@ -1,0 +1,54 @@
+<div class="login-container">
+  <!-- Left Side: Branding -->
+  <div class="login-branding">
+    <div class="brand-content">
+      <h1 class="brand-title">
+        <span class="brand-m">M</span><span class="brand-lk">LK</span>
+      </h1>
+      <p class="brand-subtitle">Your Fashion Store</p>
+      <div class="brand-description">
+        <p>Discover the latest fashion trends</p>
+        <p>Quality products at great prices</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Login Form -->
+  <div class="login-form-container">
+    <div class="login-form">
+      <h2>Welcome Back</h2>
+      <p class="login-subtitle">Sign in to your account to continue shopping</p>
+      
+      <div class="login-buttons">
+        <button class="btn-login user-login" (click)="login()">
+          <span class="icon">👤</span>
+          <span class="text">Login as User</span>
+        </button>
+        
+        <button class="btn-login admin-login" (click)="loginAsAdmin()">
+          <span class="icon">⚙️</span>
+          <span class="text">Login as Admin</span>
+        </button>
+      </div>
+
+      <div class="login-info">
+        <h3>Demo Credentials:</h3>
+        <div class="credential-box">
+          <h4>User Account</h4>
+          <p>Username: user</p>
+          <p>Password: user</p>
+        </div>
+        <div class="credential-box">
+          <h4>Admin Account</h4>
+          <p>Username: admin</p>
+          <p>Password: admin</p>
+        </div>
+      </div>
+
+      <p class="login-note">
+        Both buttons redirect to the same Keycloak login page. 
+        Use your credentials to login based on your role.
+      </p>
+    </div>
+  </div>
+</div>

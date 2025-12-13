@@ -1,0 +1,86 @@
+<main class="home-page">
+  <!-- ADMIN HOME PAGE -->
+  @if (isAdmin) {
+    <div class="admin-home">
+      <div class="admin-header">
+        <h1>Welcome Admin!</h1>
+        <p>Manage your e-commerce platform</p>
+      </div>
+
+      <div class="admin-actions">
+        <div class="action-card" routerLink="/add-product">
+          <div class="action-icon">+</div>
+          <h3>Add New Product</h3>
+          <p>Create and upload new products with images</p>
+        </div>
+        
+        <div class="action-card" routerLink="/admin">
+          <div class="action-icon">≡</div>
+          <h3>Admin Dashboard</h3>
+          <p>Manage products, inventory and orders</p>
+        </div>
+
+        <div class="action-card" (click)="viewUserShop()">
+          <div class="action-icon">◆</div>
+          <h3>View as Customer</h3>
+          <p>See how products appear to users</p>
+        </div>
+      </div>
+
+      <div class="admin-stats">
+        <div class="stat">
+          <span class="stat-number">{{ products.length }}</span>
+          <span class="stat-label">Products</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">0</span>
+          <span class="stat-label">Pending Orders</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">0</span>
+          <span class="stat-label">Low Stock Items</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- USER HOME PAGE -->
+  @if (!isAdmin) {
+    <!-- Page Title Section -->
+    <div class="page-title-section">
+      <div class="container">
+        <h1 class="page-title">Fashion for you !</h1>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    @if (orderSuccess) {
+      <div class="success-message">
+        ✓ Order Placed Successfully
+      </div>
+    } @else if (orderFailed) {
+      <div class="error-message">
+        ✗ Order Failed, please try again later
+        @if(quantityIsNull) {
+          <div>Quantity cannot be empty</div>
+        }
+      </div>
+    }
+
+    <!-- Products Grid -->
+    <div class="container">
+      @if (filteredProducts.length > 0) {
+        <div class="products-grid">
+          @for (product of filteredProducts; track product.id) {
+            <app-product-card [product]="product"></app-product-card>
+          }
+        </div>
+      } @else {
+        <div class="no-products">
+          <h2>No products found</h2>
+          <p>Try selecting a different category</p>
+        </div>
+      }
+    </div>
+  }
+</main>

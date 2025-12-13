@@ -1,0 +1,157 @@
+nohup: ignoring input
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m---------------< [0;36mcom.programming.techie:product-service[0;1m >---------------[m
+[[1;34mINFO[m] [1mBuilding product-service 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m>>> [0;32mspring-boot-maven-plugin:3.2.4:run[m [1m(default-cli)[0;1m > [0;1mtest-compile[m @ [36mproduct-service[0;1m >>>[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:resources[m [1m(default-resources)[m @ [36mproduct-service[0;1m ---[m
+[[1;34mINFO[m] Copying 1 resource from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 1 resource from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mproduct-service[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module! :input tree
+[[1;34mINFO[m] Compiling 21 source files with javac [debug release 21] to target/classes
+[[1;34mINFO[m] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:testResources[m [1m(default-testResources)[m @ [36mproduct-service[0;1m ---[m
+[[1;34mINFO[m] skip non existing resourceDirectory /home/josh/Malak_Josh/backend/product-service/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:testCompile[m [1m(default-testCompile)[m @ [36mproduct-service[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m<<< [0;32mspring-boot-maven-plugin:3.2.4:run[m [1m(default-cli)[0;1m < [0;1mtest-compile[m @ [36mproduct-service[0;1m <<<[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mspring-boot-maven-plugin:3.2.4:run[m [1m(default-cli)[m @ [36mproduct-service[0;1m ---[m
+[[1;34mINFO[m] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.4)
+
+2025-12-10T17:27:34.216+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] c.t.m.product.ProductServiceApplication  : Starting ProductServiceApplication using Java 21.0.9 with PID 18312 (/home/josh/Malak_Josh/backend/product-service/target/classes started by josh in /home/josh/Malak_Josh/backend/product-service)
+2025-12-10T17:27:34.223+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] c.t.m.product.ProductServiceApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-12-10T17:27:35.907+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2025-12-10T17:27:35.971+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 58 ms. Found 2 MongoDB repository interfaces.
+2025-12-10T17:27:36.942+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-12-10T17:27:36.961+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-10T17:27:36.962+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-12-10T17:27:37.063+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-10T17:27:37.065+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2508 ms
+2025-12-10T17:27:37.809+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.11.1"}, "os": {"type": "Linux", "name": "Linux", "architecture": "amd64", "version": "6.14.0-36-generic"}, "platform": "Java/Ubuntu/21.0.9+10-Ubuntu-124.04"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='root', source='admin', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=null, streamFactoryFactory=null, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@506b083], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@5eee3da9, com.mongodb.Jep395RecordCodecProvider@ace2408, com.mongodb.KotlinCodecProvider@3573e19d]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@5c1dd18], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
+2025-12-10T17:27:37.851+01:00  INFO 18312 --- [product-service] [localhost:27017] [                                                 ] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=21, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=39694953}
+2025-12-10T17:27:39.468+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-12-10T17:27:39.553+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-12-10T17:27:39.576+01:00  INFO 18312 --- [product-service] [           main] [                                                 ] c.t.m.product.ProductServiceApplication  : Started ProductServiceApplication in 6.535 seconds (process running for 7.001)
+DataLoader: No products loaded (manual creation only)
+2025-12-10T17:28:45.859+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [                                                 ] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-10T17:28:45.860+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [                                                 ] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-10T17:28:45.862+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [                                                 ] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-12-10T18:56:54.233+01:00  INFO 18312 --- [product-service] [io-8080-exec-10] [6939b4637834b101e977b754ee301817-c601bd4a80b8cfb3] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T18:56:54.241+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939b46536516aaa05136ff643dbde4d-116ee09f33f38582] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T18:56:54.233+01:00  INFO 18312 --- [product-service] [nio-8080-exec-6] [6939b4648b5d7f268575cf8216cf1c0f-70f12b036f0808b9] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T18:56:54.267+01:00  INFO 18312 --- [product-service] [nio-8080-exec-4] [6939b4656edb27ab5b589a89a3784850-2ecb8a173d142515] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:18:10.355+01:00  INFO 18312 --- [product-service] [nio-8080-exec-8] [6939b9623aa22cac265c0bdac7a8eab7-169b2e94b15954c3] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:20:30.428+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [6939b9eeb9ff5948d11ffbd43f31ed3f-f988cfef5651726c] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.700+01:00  INFO 18312 --- [product-service] [nio-8080-exec-8] [6939bb034778f9bbddeaee2e1ffee588-6659b8b7acaf9c16] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.753+01:00  INFO 18312 --- [product-service] [nio-8080-exec-5] [6939bb053e968b92b38fd15575141473-a5a2eba1afdeb61f] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.766+01:00  INFO 18312 --- [product-service] [nio-8080-exec-3] [6939bb05d0e1c1ee738fb2516a5d4671-1a6ed05d2b32787c] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.769+01:00  INFO 18312 --- [product-service] [nio-8080-exec-9] [6939bb05fde53f6ca4648ff117e67b01-59a362461bc16265] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.810+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939bb05ddf105d419a768e577001740-e0b53483276c570a] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:25:09.855+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [6939bb050d8eee7cecb4e7e805573fe2-06f747b30486426d] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:31:21.667+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [6939bc79383cdddb6c8cce414ed3b202-7c9bb3994a3b369d] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d updated successfully
+2025-12-10T19:32:46.563+01:00  INFO 18312 --- [product-service] [nio-8080-exec-6] [6939bcce457648c90baa80ddd69e8ded-dd797caf838eb317] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d deleted successfully
+2025-12-10T19:32:55.334+01:00  INFO 18312 --- [product-service] [nio-8080-exec-9] [6939bcd73f95bf5bdaedb94991c7cec9-8da8ef33c3e7bce3] c.t.m.product.service.ProductService     : Product with id 693958545e2ae0235de2549e deleted successfully
+2025-12-10T19:32:56.613+01:00  INFO 18312 --- [product-service] [io-8080-exec-10] [6939bcd8c1c24be003d232ab968ca467-d8cd8044519fcad9] c.t.m.product.service.ProductService     : Product with id 693958545e2ae0235de2549e deleted successfully
+2025-12-10T19:32:56.619+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939bcd8dac5966cfd693084a66d7bdd-ce72e0760dfefc7a] c.t.m.product.service.ProductService     : Product with id 693957895e2ae0235de2549d deleted successfully
+2025-12-10T19:37:56.764+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be02b5f2a72619c7d3fe39a478e3-51da7fceb92a679f] c.t.m.product.service.ImageService       : Image saved successfully: ebffa909-ebee-47ae-834b-437334833209.jpg at /home/josh/Malak_Josh/uploads/images/ebffa909-ebee-47ae-834b-437334833209.jpg
+2025-12-10T19:37:58.538+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be02b5f2a72619c7d3fe39a478e3-51da7fceb92a679f] c.t.m.product.service.ImageService       : Image saved successfully: 336d9a18-71df-408a-a40b-60603f29b08f.jpg at /home/josh/Malak_Josh/uploads/images/336d9a18-71df-408a-a40b-60603f29b08f.jpg
+2025-12-10T19:37:58.689+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be02b5f2a72619c7d3fe39a478e3-51da7fceb92a679f] c.t.m.product.service.ImageService       : Image saved successfully: 18599f5d-9b5b-49c9-add6-7e113f6a0813.jpg at /home/josh/Malak_Josh/uploads/images/18599f5d-9b5b-49c9-add6-7e113f6a0813.jpg
+2025-12-10T19:37:58.843+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be02b5f2a72619c7d3fe39a478e3-51da7fceb92a679f] c.t.m.product.service.ImageService       : Image saved successfully: d9945e66-1eeb-4b78-981a-bf1234d211ab.jpg at /home/josh/Malak_Josh/uploads/images/d9945e66-1eeb-4b78-981a-bf1234d211ab.jpg
+2025-12-10T19:38:00.522+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be02b5f2a72619c7d3fe39a478e3-51da7fceb92a679f] c.t.m.product.service.ProductService     : Product created successfully with 3 images
+2025-12-10T19:38:49.313+01:00  INFO 18312 --- [product-service] [nio-8080-exec-1] [6939be393e7a4f4564a782bc1828c3eb-0d57d96c74147a10] c.t.m.product.service.ProductService     : Product with id 6939be08454cf96ee5d85136 updated successfully
+2025-12-10T19:39:48.170+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be74f05b06277b1af0b49b95c96f-13521062a0b3d146] c.t.m.product.service.ImageService       : Image saved successfully: 0f606495-bb04-4744-b96b-5d417ba21594.jpg at /home/josh/Malak_Josh/uploads/images/0f606495-bb04-4744-b96b-5d417ba21594.jpg
+2025-12-10T19:39:48.173+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be74f05b06277b1af0b49b95c96f-13521062a0b3d146] c.t.m.product.service.ImageService       : Image saved successfully: cbfb85e6-3095-44a6-81c0-e2daf3a25138.jpg at /home/josh/Malak_Josh/uploads/images/cbfb85e6-3095-44a6-81c0-e2daf3a25138.jpg
+2025-12-10T19:39:48.175+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be74f05b06277b1af0b49b95c96f-13521062a0b3d146] c.t.m.product.service.ImageService       : Image saved successfully: 2edc758d-4153-43fd-b5f5-e539a2cd2a4d.jpg at /home/josh/Malak_Josh/uploads/images/2edc758d-4153-43fd-b5f5-e539a2cd2a4d.jpg
+2025-12-10T19:39:48.178+01:00  INFO 18312 --- [product-service] [nio-8080-exec-7] [6939be74f05b06277b1af0b49b95c96f-13521062a0b3d146] c.t.m.product.service.ProductService     : Product created successfully with 2 images
+2025-12-10T19:48:02.712+01:00  INFO 18312 --- [product-service] [nio-8080-exec-6] [6939c06254051a0322e55a3d136ca0a1-5db11535927b5b68] c.t.m.product.service.ImageService       : Image saved successfully: 61d7779a-f259-4629-a254-6c36a7430833.webp at /home/josh/Malak_Josh/uploads/images/61d7779a-f259-4629-a254-6c36a7430833.webp
+2025-12-10T19:48:02.733+01:00  INFO 18312 --- [product-service] [nio-8080-exec-6] [6939c06254051a0322e55a3d136ca0a1-5db11535927b5b68] c.t.m.product.service.ImageService       : Image saved successfully: c5b946d7-fcf7-4c35-894f-1cbb9d98a8de.webp at /home/josh/Malak_Josh/uploads/images/c5b946d7-fcf7-4c35-894f-1cbb9d98a8de.webp
+2025-12-10T19:48:05.988+01:00  INFO 18312 --- [product-service] [nio-8080-exec-6] [6939c06254051a0322e55a3d136ca0a1-5db11535927b5b68] c.t.m.product.service.ProductService     : Product created successfully with 1 images
+2025-12-10T19:49:06.258+01:00  INFO 18312 --- [product-service] [nio-8080-exec-5] [6939c0a29c6ae462d57d23a363e3ae62-60c3709118e2b3d5] c.t.m.product.service.ProductService     : Product with id 6939c064454cf96ee5d85138 updated successfully
+2025-12-10T19:49:18.604+01:00  INFO 18312 --- [product-service] [nio-8080-exec-4] [6939c0aebeb1387e35828398cf9d1eb9-4c97c89cf4a89e3a] c.t.m.product.service.ProductService     : Product with id 6939c064454cf96ee5d85138 deleted successfully
+2025-12-10T19:52:10.542+01:00  INFO 18312 --- [product-service] [localhost:27017] [                                                 ] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server localhost:27017
+
+com.mongodb.MongoNodeIsRecoveringException: Command failed with error 11600 (InterruptedAtShutdown): 'interrupted at shutdown' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "interrupted at shutdown", "code": 11600, "codeName": "InterruptedAtShutdown"}
+	at com.mongodb.internal.connection.ProtocolHelper.createSpecialException(ProtocolHelper.java:251)
+	at com.mongodb.internal.connection.ProtocolHelper.getCommandFailureException(ProtocolHelper.java:201)
+	at com.mongodb.internal.connection.InternalStreamConnection.receiveCommandMessageResponse(InternalStreamConnection.java:454)
+	at com.mongodb.internal.connection.InternalStreamConnection.receive(InternalStreamConnection.java:404)
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:224)
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:156)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+2025-12-10T19:52:20.642+01:00  INFO 18312 --- [product-service] [localhost:27017] [                                                 ] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server localhost:27017
+
+com.mongodb.MongoSocketOpenException: Exception opening socket
+	at com.mongodb.internal.connection.SocketStream.lambda$open$0(SocketStream.java:84)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.mongodb.internal.connection.SocketStream.open(SocketStream.java:84)
+	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:211)
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:196)
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:156)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at com.mongodb.internal.connection.SocketStreamHelper.initialize(SocketStreamHelper.java:76)
+	at com.mongodb.internal.connection.SocketStream.initializeSocket(SocketStream.java:104)
+	at com.mongodb.internal.connection.SocketStream.open(SocketStream.java:78)
+	... 4 common frames omitted
+
+19:53:10,737 |-ERROR in com.github.loki4j.client.pipeline.DefaultPipeline@30502681 - Error while sending Batch #8ce6f1b3926 (1,918 bytes) to Loki (http://localhost:3100/loki/api/v1/push) java.net.ConnectException
+	at java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:955)
+	at 	at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133)
+	at 	at com.github.loki4j.client.http.JavaHttpClient.send(JavaHttpClient.java:68)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendBatch(DefaultPipeline.java:263)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.sendStep(DefaultPipeline.java:249)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.runSendLoop(DefaultPipeline.java:183)
+	at 	at com.github.loki4j.client.pipeline.DefaultPipeline.lambda$start$2(DefaultPipeline.java:108)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at 	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.ConnectException
+	at 	at java.net.http/jdk.internal.net.http.common.Utils.toConnectException(Utils.java:1065)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:227)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.checkRetryConnect(PlainHttpConnection.java:280)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$2(PlainHttpConnection.java:238)
+	at 	at java.base/java.util.concurrent.CompletableFuture.uniHandle(CompletableFuture.java:934)
+	at 	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(CompletableFuture.java:911)
+	at 	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at 	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)
+	at 	... 3 common frames omitted
+Caused by: java.nio.channels.ClosedChannelException
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.ensureOpen(SocketChannelImpl.java:202)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.beginConnect(SocketChannelImpl.java:786)
+	at 	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:874)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$1(PlainHttpConnection.java:210)
+	at 	at java.base/java.security.AccessController.doPrivileged(AccessController.java:571)
+	at 	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:212)
+	at 	... 9 common frames omitted
