@@ -28,7 +28,8 @@ pipeline {
             steps {
                 script {
                     echo '====== Checking out code from GitHub ======'
-                    checkout scm
+                    checkout scm 
+                    #fjfjfffjsdjdsjdshsdi
                 }
             }
         }
