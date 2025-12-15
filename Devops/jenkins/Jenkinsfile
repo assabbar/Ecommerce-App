@@ -13,6 +13,12 @@ pipeline {
         PRODUCT_SERVICE_URL = 'http://localhost:8080'
         ORDER_SERVICE_URL = 'http://localhost:8081'
         INVENTORY_SERVICE_URL = 'http://localhost:8082'
+        
+        // Build control flags
+        RUN_BACKEND_COMPILATION = 'false'
+        RUN_FRONTEND_TESTS = 'false'
+        RUN_BUILD_BACKEND = 'false'
+        RUN_INTEGRATION_TESTS = 'true'
     }
 
     stages {
@@ -26,88 +32,85 @@ pipeline {
             }
         }
 
-        // stage('Backend Compilation') {
-        //     agent {
-        //         docker {
-        //             image 'maven:3.9-eclipse-temurin-21'
-        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
-        //         }
-        //     }
-        //     steps {
-        //         script {
-        //             echo '====== Backend Compilation & Validation ======'
-        //             sh '''
-        //                 cd ${BACKEND_DIR}
-        //                 echo "Compiling backend services..."
-        //                 mvn clean compile -q
-        //                 echo "✓ Backend compilation successful!"
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Backend Compilation') {
+            when {
+                expression {
+                    return env.RUN_BACKEND_COMPILATION == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Backend Compilation & Validation ======'
+                    sh '''
+                        cd ${BACKEND_DIR}
+                        echo "Compiling backend services..."
+                        mvn clean compile -q
+                        echo "✓ Backend compilation successful!"
+                    '''
+                }
+            }
+        }
 
-        // stage('Frontend Unit Tests') {
-        //     agent {
-        //         docker {
-        //             image 'node:20-alpine'
-        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
-        //         }
-        //     }
-        //     steps {
-        //         script {
-        //             echo '====== Frontend Unit Tests ======'
-        //             sh '''
-        //                 # Install Chromium for Karma tests
-        //                 apk add --no-cache chromium
-        //                 export CHROME_BIN=/usr/bin/chromium-browser
-        //                 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-        //                 
-        //                 cd ${FRONTEND_DIR}
-        //                 npm ci --legacy-peer-deps
-        //                 
-        //                 # Create custom Karma launcher for root
-        //                 cat >> karma.conf.js << 'EOF'
+        stage('Frontend Unit Tests') {
+            when {
+                expression {
+                    return env.RUN_FRONTEND_TESTS == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Frontend Unit Tests ======'
+                    sh '''
+                        apk add --no-cache chromium
+                        export CHROME_BIN=/usr/bin/chromium-browser
+                        export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+                        
+                        cd ${FRONTEND_DIR}
+                        npm ci --legacy-peer-deps
+                        npm test -- --watch=false --browsers=ChromeHeadless --no-sandbox
+                    '''
+                }
+            }
+        }
 
-module.exports = function(config) {
-  config.set({
-    customLaunchers: {
-      ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
-      }
-    }
-  });
-};
-EOF
-        //                 
-        //                 # Run tests with custom launcher
-        //                 npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
-        //             '''
-        //         }
-        //     }
-        // }
-
-        // stage('Build Backend') {
-        //     agent {
-        //         docker {
-        //             image 'maven:3.9-eclipse-temurin-21'
-        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
-        //         }
-        //     }
-        //     steps {
-        //         script {
-        //             echo '====== Building Backend ======'
-        //             sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
-        //         }
-        //     }
-        // }
+        stage('Build Backend') {
+            when {
+                expression {
+                    return env.RUN_BUILD_BACKEND == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Building Backend ======'
+                    sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
+                }
+            }
+        }
 
         stage('Docker Build & Integration Tests') {
+            when {
+                expression {
+                    return env.RUN_INTEGRATION_TESTS == 'true'
+                }
+            }
             agent {
                 docker {
                     image 'docker:latest'
