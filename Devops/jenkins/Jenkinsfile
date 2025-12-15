@@ -3,16 +3,20 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 90, unit: 'MINUTES')
     }
 
     environment {
         BACKEND_DIR = 'backend'
         FRONTEND_DIR = 'frontend'
+        
+        // Service URLs
         API_GATEWAY_URL = 'http://localhost:9000'
         PRODUCT_SERVICE_URL = 'http://localhost:8080'
         ORDER_SERVICE_URL = 'http://localhost:8081'
         INVENTORY_SERVICE_URL = 'http://localhost:8082'
+        NOTIFICATION_SERVICE_URL = 'http://localhost:8083'
+        FRONTEND_URL = 'http://localhost:3000'
         
         // Build control flags
         RUN_BACKEND_COMPILATION = 'false'
@@ -125,12 +129,12 @@ pipeline {
                         
                         # Cleanup any existing containers by name
                         echo "Cleaning up existing containers..."
-                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui 2>/dev/null || true
+                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui frontend 2>/dev/null || true
                         docker compose down -v || true
                         
                         # Build images
                         echo "Building Docker images..."
-                        docker compose build
+                        docker compose build --no-cache
                         
                         # Start infrastructure
                         echo "Starting infrastructure services..."
@@ -140,18 +144,43 @@ pipeline {
                         # Build and start microservices
                         echo "Building and starting microservices..."
                         docker compose up -d product-service inventory-service order-service notification-service api-gateway
-                        sleep 45
+                        sleep 60
+                        
+                        # Start frontend
+                        echo "Starting frontend..."
+                        docker compose up -d frontend
+                        sleep 30
                         
                         # Health checks
                         echo "Running health checks..."
+                        echo "Checking Product Service..."
                         curl -f http://localhost:8080/actuator/health || exit 1
+                        echo "✓ Product Service UP"
+                        
+                        echo "Checking Order Service..."
                         curl -f http://localhost:8081/actuator/health || exit 1
+                        echo "✓ Order Service UP"
+                        
+                        echo "Checking Inventory Service..."
                         curl -f http://localhost:8082/actuator/health || exit 1
+                        echo "✓ Inventory Service UP"
+                        
+                        echo "Checking Notification Service..."
                         curl -f http://localhost:8083/actuator/health || exit 1
+                        echo "✓ Notification Service UP"
+                        
+                        echo "Checking API Gateway..."
                         curl -f http://localhost:9000/actuator/health || exit 1
-                        echo "✓ All services healthy!"
+                        echo "✓ API Gateway UP"
+                        
+                        echo "Checking Frontend..."
+                        curl -f http://localhost:3000/ > /dev/null || exit 1
+                        echo "✓ Frontend UP"
+                        
+                        echo "✓ All services healthy and running!"
                         
                         # Cleanup
+                        echo "Cleaning up containers..."
                         docker compose down -v
                     '''
                 }
@@ -165,6 +194,11 @@ pipeline {
         }
         failure {
             echo '✗ Pipeline Failed!'
+        }
+        always {
+            node('any') {
+                sh 'docker compose down -v 2>/dev/null || true'
+            }
         }
     }
 }
