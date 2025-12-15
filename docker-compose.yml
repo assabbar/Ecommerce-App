@@ -143,8 +143,8 @@ services:
   # Microservices
   product-service:
     build:
-      context: ./backend/product-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: product-service/Dockerfile
     container_name: product-service
     ports:
       - "8080:8080"
@@ -159,8 +159,8 @@ services:
 
   order-service:
     build:
-      context: ./backend/order-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: order-service/Dockerfile
     container_name: order-service
     ports:
       - "8081:8081"
@@ -181,8 +181,8 @@ services:
 
   inventory-service:
     build:
-      context: ./backend/inventory-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: inventory-service/Dockerfile
     container_name: inventory-service
     ports:
       - "8082:8082"
@@ -199,8 +199,8 @@ services:
 
   notification-service:
     build:
-      context: ./backend/notification-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
     container_name: notification-service
     ports:
       - "8083:8083"
@@ -217,8 +217,8 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     ports:
       - "9000:9000"
