@@ -57,6 +57,11 @@ pipeline {
                 script {
                     echo '====== Frontend Unit Tests ======'
                     sh '''
+                        # Install Chromium for Karma tests
+                        apk add --no-cache chromium
+                        export CHROME_BIN=/usr/bin/chromium-browser
+                        export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+                        
                         cd ${FRONTEND_DIR}
                         npm ci --legacy-peer-deps
                         npm test -- --watch=false --browsers=ChromeHeadless
