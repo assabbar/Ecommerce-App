@@ -1,0 +1,204 @@
+pipeline {
+    agent none
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 90, unit: 'MINUTES')
+    }
+
+    environment {
+        BACKEND_DIR = 'backend'
+        FRONTEND_DIR = 'frontend'
+        
+        // Service URLs
+        API_GATEWAY_URL = 'http://localhost:9000'
+        PRODUCT_SERVICE_URL = 'http://localhost:8080'
+        ORDER_SERVICE_URL = 'http://localhost:8081'
+        INVENTORY_SERVICE_URL = 'http://localhost:8082'
+        NOTIFICATION_SERVICE_URL = 'http://localhost:8083'
+        FRONTEND_URL = 'http://localhost:3000'
+        
+        // Build control flags
+        RUN_BACKEND_COMPILATION = 'false'
+        RUN_FRONTEND_TESTS = 'false'
+        RUN_BUILD_BACKEND = 'false'
+        RUN_INTEGRATION_TESTS = 'true'
+    }
+
+    stages {
+        stage('Checkout') {
+            agent any
+            steps {
+                script {
+                    echo '====== Checking out code ======'
+                    checkout scm
+                }
+            }
+        }
+
+        stage('Backend Compilation') {
+            when {
+                expression {
+                    return env.RUN_BACKEND_COMPILATION == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Backend Compilation & Validation ======'
+                    sh '''
+                        cd ${BACKEND_DIR}
+                        echo "Compiling backend services..."
+                        mvn clean compile -q
+                        echo "✓ Backend compilation successful!"
+                    '''
+                }
+            }
+        }
+
+        stage('Frontend Unit Tests') {
+            when {
+                expression {
+                    return env.RUN_FRONTEND_TESTS == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Frontend Unit Tests ======'
+                    sh '''
+                        apk add --no-cache chromium
+                        export CHROME_BIN=/usr/bin/chromium-browser
+                        export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+                        
+                        cd ${FRONTEND_DIR}
+                        npm ci --legacy-peer-deps
+                        npm test -- --watch=false --browsers=ChromeHeadless --no-sandbox
+                    '''
+                }
+            }
+        }
+
+        stage('Build Backend') {
+            when {
+                expression {
+                    return env.RUN_BUILD_BACKEND == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Building Backend ======'
+                    sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
+                }
+            }
+        }
+
+        stage('Docker Build & Integration Tests') {
+            when {
+                expression {
+                    return env.RUN_INTEGRATION_TESTS == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'docker:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock --network host'
+                }
+            }
+            steps {
+                script {
+                    echo '====== Docker Build & Integration Tests ======'
+                    sh '''
+                        apk add --no-cache docker-compose curl bash
+                        
+                        # Cleanup any existing containers by name
+                        echo "Cleaning up existing containers..."
+                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui frontend 2>/dev/null || true
+                        docker compose down -v || true
+                        
+                        # Build images
+                        echo "Building Docker images..."
+                        docker compose build --no-cache
+                        
+                        # Start infrastructure
+                        echo "Starting infrastructure services..."
+                        docker compose up -d mongodb mysql zookeeper broker schema-registry
+                        sleep 45
+                        
+                        # Build and start microservices
+                        echo "Building and starting microservices..."
+                        docker compose up -d product-service inventory-service order-service notification-service api-gateway
+                        sleep 60
+                        
+                        # Start frontend
+                        echo "Starting frontend..."
+                        docker compose up -d frontend
+                        sleep 30
+                        
+                        # Health checks
+                        echo "Running health checks..."
+                        echo "Checking Product Service..."
+                        curl -f http://localhost:8080/actuator/health || exit 1
+                        echo "✓ Product Service UP"
+                        
+                        echo "Checking Order Service..."
+                        curl -f http://localhost:8081/actuator/health || exit 1
+                        echo "✓ Order Service UP"
+                        
+                        echo "Checking Inventory Service..."
+                        curl -f http://localhost:8082/actuator/health || exit 1
+                        echo "✓ Inventory Service UP"
+                        
+                        echo "Checking Notification Service..."
+                        curl -f http://localhost:8083/actuator/health || exit 1
+                        echo "✓ Notification Service UP"
+                        
+                        echo "Checking API Gateway..."
+                        curl -f http://localhost:9000/actuator/health || exit 1
+                        echo "✓ API Gateway UP"
+                        
+                        echo "Checking Frontend..."
+                        curl -f http://localhost:3000/ > /dev/null || exit 1
+                        echo "✓ Frontend UP"
+                        
+                        echo "✓ All services healthy and running!"
+                        
+                        # Cleanup
+                        echo "Cleaning up containers..."
+                        docker compose down -v
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✓ Pipeline Success!'
+        }
+        failure {
+            echo '✗ Pipeline Failed!'
+        }
+        always {
+            node('any') {
+                sh 'docker compose down -v 2>/dev/null || true'
+            }
+        }
+    }
+}
