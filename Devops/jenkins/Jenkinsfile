@@ -123,8 +123,9 @@ pipeline {
                     sh '''
                         apk add --no-cache docker-compose curl bash
                         
-                        # Cleanup any existing containers
+                        # Cleanup any existing containers by name
                         echo "Cleaning up existing containers..."
+                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service 2>/dev/null || true
                         docker compose down -v || true
                         
                         # Build images
