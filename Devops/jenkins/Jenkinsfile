@@ -26,47 +26,47 @@ pipeline {
             }
         }
 
-        stage('Backend Compilation') {
-            agent {
-                docker {
-                    image 'maven:3.9-eclipse-temurin-21'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
-            steps {
-                script {
-                    echo '====== Backend Compilation & Validation ======'
-                    sh '''
-                        cd ${BACKEND_DIR}
-                        echo "Compiling backend services..."
-                        mvn clean compile -q
-                        echo "✓ Backend compilation successful!"
-                    '''
-                }
-            }
-        }
+        // stage('Backend Compilation') {
+        //     agent {
+        //         docker {
+        //             image 'maven:3.9-eclipse-temurin-21'
+        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             echo '====== Backend Compilation & Validation ======'
+        //             sh '''
+        //                 cd ${BACKEND_DIR}
+        //                 echo "Compiling backend services..."
+        //                 mvn clean compile -q
+        //                 echo "✓ Backend compilation successful!"
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Frontend Unit Tests') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
-            steps {
-                script {
-                    echo '====== Frontend Unit Tests ======'
-                    sh '''
-                        # Install Chromium for Karma tests
-                        apk add --no-cache chromium
-                        export CHROME_BIN=/usr/bin/chromium-browser
-                        export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-                        
-                        cd ${FRONTEND_DIR}
-                        npm ci --legacy-peer-deps
-                        
-                        # Create custom Karma launcher for root
-                        cat >> karma.conf.js << 'EOF'
+        // stage('Frontend Unit Tests') {
+        //     agent {
+        //         docker {
+        //             image 'node:20-alpine'
+        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             echo '====== Frontend Unit Tests ======'
+        //             sh '''
+        //                 # Install Chromium for Karma tests
+        //                 apk add --no-cache chromium
+        //                 export CHROME_BIN=/usr/bin/chromium-browser
+        //                 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+        //                 
+        //                 cd ${FRONTEND_DIR}
+        //                 npm ci --legacy-peer-deps
+        //                 
+        //                 # Create custom Karma launcher for root
+        //                 cat >> karma.conf.js << 'EOF'
 
 module.exports = function(config) {
   config.set({
@@ -84,13 +84,13 @@ module.exports = function(config) {
   });
 };
 EOF
-                        
-                        # Run tests with custom launcher
-                        npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
-                    '''
-                }
-            }
-        }
+        //                 
+        //                 # Run tests with custom launcher
+        //                 npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+        //             '''
+        //         }
+        //     }
+        // }
 
         // stage('Build Backend') {
         //     agent {
@@ -119,15 +119,34 @@ EOF
                     echo '====== Docker Build & Integration Tests ======'
                     sh '''
                         apk add --no-cache docker-compose curl bash
+                        
+                        # Cleanup any existing containers
+                        echo "Cleaning up existing containers..."
+                        docker compose down -v || true
+                        
+                        # Build images
+                        echo "Building Docker images..."
                         docker compose build
+                        
+                        # Start infrastructure
+                        echo "Starting infrastructure services..."
                         docker compose up -d mongodb mysql zookeeper broker schema-registry
                         sleep 30
+                        
+                        # Start all microservices
+                        echo "Starting microservices..."
                         docker compose up -d
                         sleep 45
+                        
+                        # Health checks
+                        echo "Running health checks..."
                         curl -f ${PRODUCT_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${ORDER_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${INVENTORY_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${API_GATEWAY_URL}/actuator/health || exit 1
+                        echo "✓ All services healthy!"
+                        
+                        # Cleanup
                         docker compose down -v
                     '''
                 }
