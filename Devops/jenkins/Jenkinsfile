@@ -135,19 +135,20 @@ pipeline {
                         # Start infrastructure
                         echo "Starting infrastructure services..."
                         docker compose up -d mongodb mysql zookeeper broker schema-registry
-                        sleep 30
+                        sleep 45
                         
-                        # Start microservices (skip monitoring stack)
-                        echo "Starting microservices..."
+                        # Build and start microservices
+                        echo "Building and starting microservices..."
                         docker compose up -d product-service inventory-service order-service notification-service api-gateway
                         sleep 45
                         
                         # Health checks
                         echo "Running health checks..."
-                        curl -f ${PRODUCT_SERVICE_URL}/actuator/health || exit 1
-                        curl -f ${ORDER_SERVICE_URL}/actuator/health || exit 1
-                        curl -f ${INVENTORY_SERVICE_URL}/actuator/health || exit 1
-                        curl -f ${API_GATEWAY_URL}/actuator/health || exit 1
+                        curl -f http://localhost:8080/actuator/health || exit 1
+                        curl -f http://localhost:8081/actuator/health || exit 1
+                        curl -f http://localhost:8082/actuator/health || exit 1
+                        curl -f http://localhost:8083/actuator/health || exit 1
+                        curl -f http://localhost:9000/actuator/health || exit 1
                         echo "✓ All services healthy!"
                         
                         # Cleanup

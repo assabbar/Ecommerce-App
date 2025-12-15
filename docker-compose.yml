@@ -140,6 +140,103 @@ services:
     networks:
       - microservices
 
+  # Microservices
+  product-service:
+    build:
+      context: ./backend/product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:password@mongodb:27017/product-service?authSource=admin
+      LOGGING_LEVEL_ROOT: INFO
+    depends_on:
+      - mongodb
+    networks:
+      - microservices
+    restart: on-failure
+
+  order-service:
+    build:
+      context: ./backend/order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/orders
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: mysql
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      INVENTORY_SERVICE_URL: http://inventory-service:8082
+      LOGGING_LEVEL_ROOT: INFO
+    depends_on:
+      - mysql
+      - broker
+      - inventory-service
+    networks:
+      - microservices
+    restart: on-failure
+
+  inventory-service:
+    build:
+      context: ./backend/inventory-service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/inventory
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: mysql
+      LOGGING_LEVEL_ROOT: INFO
+    depends_on:
+      - mysql
+    networks:
+      - microservices
+    restart: on-failure
+
+  notification-service:
+    build:
+      context: ./backend/notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8083:8083"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      LOGGING_LEVEL_ROOT: INFO
+    depends_on:
+      - broker
+      - schema-registry
+    networks:
+      - microservices
+    restart: on-failure
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: product-service
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://product-service:8080
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/product/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: order-service
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://order-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/order/**
+      LOGGING_LEVEL_ROOT: INFO
+    depends_on:
+      - product-service
+      - order-service
+    networks:
+      - microservices
+    restart: on-failure
+
 networks:
   microservices:
     driver: bridge
