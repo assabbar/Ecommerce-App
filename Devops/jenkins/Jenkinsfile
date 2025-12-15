@@ -29,7 +29,6 @@ pipeline {
                 script {
                     echo '====== Checking out code from GitHub ======'
                     checkout scm 
-                    #fjfjfffjsdjdsjdshsdi
                 }
             }
         }
