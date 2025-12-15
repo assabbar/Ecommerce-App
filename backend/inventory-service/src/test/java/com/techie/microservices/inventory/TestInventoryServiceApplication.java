@@ -1,4 +1,4 @@
-package java.com.techie.microservices.inventory;
+package com.techie.microservices.inventory;
 
 import com.techie.microservices.inventory.InventoryServiceApplication;
 import org.springframework.boot.SpringApplication;
