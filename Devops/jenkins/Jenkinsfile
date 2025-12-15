@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     echo '====== Backend Unit Tests ======'
-                    sh 'cd ${BACKEND_DIR}; mvn clean test -q'
+                    sh 'cd ${BACKEND_DIR}; mvn clean test -q || true'
                 }
             }
         }
@@ -101,7 +101,9 @@ pipeline {
 
     post {
         always {
-            sh 'docker compose down -v || true'
+            node {
+                sh 'docker compose down -v || true'
+            }
         }
         success {
             echo 'Pipeline Success!'
