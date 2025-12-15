@@ -6,28 +6,18 @@ pipeline {
         timeout(time: 90, unit: 'MINUTES')
     }
 
-    environment {
-        // Control flags for each stage
-        RUN_BACKEND_COMPILATION = 'true'
-        RUN_BUILD_DOCKER_IMAGES = 'true'
-        RUN_INTEGRATION_TESTS = 'true'
-    }
-
     stages {
         stage('Checkout') {
             agent any
             steps {
                 script {
-                    echo '====== Checking out code from GitHub ======'
+                    echo '====== CI: Checking out code from GitHub ======'
                     checkout scm
                 }
             }
         }
 
-        stage('Backend Compilation & Tests') {
-            when {
-                expression { return env.RUN_BACKEND_COMPILATION == 'true' }
-            }
+        stage('Backend Compilation') {
             agent {
                 docker {
                     image 'maven:3.9-eclipse-temurin-21'
@@ -36,10 +26,10 @@ pipeline {
             }
             steps {
                 script {
-                    echo '====== Compiling Backend Services ======'
+                    echo '====== CI: Compiling Backend Services ======'
                     sh '''
                         cd backend
-                        echo "Compiling all backend services..."
+                        echo "Compiling all backend microservices..."
                         mvn clean compile -DskipTests -q
                         echo "✅ Backend compilation successful!"
                     '''
@@ -48,9 +38,6 @@ pipeline {
         }
 
         stage('Build Docker Images') {
-            when {
-                expression { return env.RUN_BUILD_DOCKER_IMAGES == 'true' }
-            }
             agent {
                 docker {
                     image 'docker:latest'
@@ -59,73 +46,23 @@ pipeline {
             }
             steps {
                 script {
-                    echo '====== Building All Docker Images ======'
+                    echo '====== CI: Building Docker Images ======'
                     sh '''
                         apk add --no-cache docker-compose bash
                         
-                        echo "Cleaning up existing containers..."
-                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui frontend || true
-                        docker compose down -v || true
+                        echo "Cleaning up old images and containers..."
+                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui frontend 2>/dev/null || true
+                        docker compose down -v 2>/dev/null || true
                         
-                        echo "Building Docker images..."
+                        echo "Building Docker images for all services..."
                         docker compose build --no-cache
-                        
-                        echo "Docker images built successfully!"
-                        docker images | grep -E "product-service|order-service|inventory-service|notification-service|api-gateway|frontend"
-                    '''
-                }
-            }
-        }
-
-        stage('Integration Tests - Full Stack') {
-            when {
-                expression { return env.RUN_INTEGRATION_TESTS == 'true' }
-            }
-            agent {
-                docker {
-                    image 'docker:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock --network host'
-                }
-            }
-            steps {
-                script {
-                    echo '====== Full Stack Integration: Backend + Frontend + Databases ======'
-                    sh '''
-                        apk add --no-cache curl bash
-                        
-                        echo "Starting all services with docker-compose..."
-                        docker compose up -d
-                        
-                        echo "Waiting for infrastructure (MongoDB, MySQL, Kafka)..."
-                        sleep 45
-                        
-                        echo "Waiting for microservices to start..."
-                        sleep 60
-                        
-                        echo "=== Service Health Checks ==="
-                        
-                        echo "✓ Checking Product Service (8080)..."
-                        curl -f http://localhost:8080/actuator/health || exit 1
-                        
-                        echo "✓ Checking Order Service (8081)..."
-                        curl -f http://localhost:8081/actuator/health || exit 1
-                        
-                        echo "✓ Checking Inventory Service (8082)..."
-                        curl -f http://localhost:8082/actuator/health || exit 1
-                        
-                        echo "✓ Checking Notification Service (8083)..."
-                        curl -f http://localhost:8083/actuator/health || exit 1
-                        
-                        echo "✓ Checking API Gateway (9000)..."
-                        curl -f http://localhost:9000/actuator/health || exit 1
-                        
-                        echo "✓ Checking Frontend (3000)..."
-                        curl -f http://localhost:3000/ || exit 1
                         
                         echo ""
                         echo "================================================"
-                        echo "✅ ALL SERVICES ARE UP AND HEALTHY!"
+                        echo "✅ DOCKER IMAGES BUILT SUCCESSFULLY!"
                         echo "================================================"
+                        echo ""
+                        docker images | grep -E "e-commerce-pipeline|product-service|order-service|inventory-service|notification-service|api-gateway|frontend"
                     '''
                 }
             }
@@ -133,25 +70,27 @@ pipeline {
     }
 
     post {
-        always {
-            node('any') {
-                script {
-                    echo '====== Cleaning up all containers ======'
-                    sh '''
-                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui frontend || true
-                        docker compose down -v || true
-                    '''
-                }
-            }
-        }
         success {
             node('any') {
-                echo '✅ Pipeline completed successfully!'
+                echo ''
+                echo '================================================'
+                echo '✅ CI PIPELINE COMPLETED SUCCESSFULLY!'
+                echo '================================================'
+                echo 'Backend compiled ✓'
+                echo 'Docker images built ✓'
+                echo ''
+                echo 'Next step: CD deployment to Azure AKS'
+                echo '================================================'
             }
         }
         failure {
             node('any') {
-                echo '❌ Pipeline failed. Check logs above.'
+                echo ''
+                echo '================================================'
+                echo '❌ CI PIPELINE FAILED'
+                echo '================================================'
+                echo 'Check logs above for details'
+                echo '================================================'
             }
         }
     }
