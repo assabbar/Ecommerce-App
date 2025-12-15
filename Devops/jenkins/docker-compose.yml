@@ -17,8 +17,12 @@ services:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     networks:
       - jenkins-network
-    entrypoint: |
-      sh -c 'apt-get update && apt-get install -y docker.io && /usr/local/bin/jenkins.sh'
+    command: |
+      bash -c '
+        apt-get update && \
+        apt-get install -y docker.io nodejs npm maven && \
+        /usr/local/bin/jenkins.sh
+      '
 
 volumes:
   jenkins_home:
