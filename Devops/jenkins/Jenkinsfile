@@ -125,7 +125,7 @@ pipeline {
                         
                         # Cleanup any existing containers by name
                         echo "Cleaning up existing containers..."
-                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service 2>/dev/null || true
+                        docker rm -f mongodb mysql zookeeper broker schema-registry api-gateway product-service order-service inventory-service notification-service prometheus loki tempo grafana kafka-ui 2>/dev/null || true
                         docker compose down -v || true
                         
                         # Build images
