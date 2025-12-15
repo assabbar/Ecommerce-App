@@ -137,9 +137,9 @@ pipeline {
                         docker compose up -d mongodb mysql zookeeper broker schema-registry
                         sleep 30
                         
-                        # Start all microservices
+                        # Start microservices (skip monitoring stack)
                         echo "Starting microservices..."
-                        docker compose up -d
+                        docker compose up -d product-service inventory-service order-service notification-service api-gateway
                         sleep 45
                         
                         # Health checks
