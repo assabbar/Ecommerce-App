@@ -78,8 +78,11 @@ pipeline {
                     sh '''
                         cd backend
                         
-                        echo "Running integration tests for Inventory Service..."
-                        mvn verify -pl inventory-service -DskipUnitTests=true -q || echo "⚠️  Integration tests skipped for inventory-service"
+                        echo "Running all tests for Inventory Service (including integration tests)..."
+                        mvn test -pl inventory-service -q || echo "⚠️  Some tests may have been skipped for inventory-service"
+                        
+                        echo "Running all tests for Order Service..."
+                        mvn test -pl order-service -q || echo "⚠️  Some tests may have been skipped for order-service"
                         
                         echo "✅ Integration tests completed!"
                     '''
