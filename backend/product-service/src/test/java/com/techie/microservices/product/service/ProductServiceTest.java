@@ -48,8 +48,16 @@ class ProductServiceTest {
                 "test-id-123",
                 "Test Product",
                 "Test Description",
+                "TEST-SKU",
                 BigDecimal.valueOf(99.99),
-                null
+                "Electronics",
+                Arrays.asList("image1.jpg", "image2.jpg"),
+                "image1.jpg",
+                4.5,
+                100,
+                50,
+                Arrays.asList("Black", "White"),
+                Arrays.asList("S", "M", "L")
         );
     }
 
