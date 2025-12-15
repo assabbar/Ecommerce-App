@@ -3,7 +3,10 @@ WORKDIR /app
 COPY pom.xml .
 COPY product-service ./product-service
 COPY api-gateway ./api-gateway
-RUN mvn clean package -DskipTests -q -pl product-service -am
+COPY order-service ./order-service
+COPY inventory-service ./inventory-service
+COPY notification-service ./notification-service
+RUN mvn clean package -DskipTests -q
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
