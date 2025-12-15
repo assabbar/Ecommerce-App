@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+# E-Commerce-app
+=======
 ro  # Spring Boot Microservices
 This repository contains the latest source code of the spring-boot-microservices tutorial
 
@@ -110,3 +113,4 @@ To access the Grafana dashboards, you need to port-forward the grafana service t
 ```shell
 kubectl port-forward svc/grafana 3000:3000
 ```
+>>>>>>> 0fd7e16 (initial commit : ecommerce platforme with spring book backend and angular frontenc)

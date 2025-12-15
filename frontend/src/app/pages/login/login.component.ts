@@ -1,35 +1,38 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
-  private readonly oidcSecurityService = inject(OidcSecurityService);
+export class LoginComponent {
   private readonly router = inject(Router);
-
-  ngOnInit(): void {
-    // Check if user is already authenticated
-    this.oidcSecurityService.isAuthenticated$.subscribe(({ isAuthenticated }) => {
-      if (isAuthenticated) {
-        this.router.navigate(['/']);
-      }
-    });
-  }
+  
+  username: string = 'admin';
+  password: string = '';
+  errorMessage: string = '';
 
   login(): void {
-    console.log('Login button clicked');
-    this.oidcSecurityService.authorize();
+    // Simple demo login without Keycloak
+    if (this.username && this.password) {
+      // Store in localStorage for demo purposes
+      localStorage.setItem('auth_token', 'demo-token-' + this.username);
+      localStorage.setItem('username', this.username);
+      localStorage.setItem('role', this.username === 'admin' ? 'ADMIN' : 'USER');
+      this.router.navigate(['/']);
+    } else {
+      this.errorMessage = 'Please enter username and password';
+    }
   }
 
   loginAsAdmin(): void {
-    // The actual login is the same, the role is determined by Keycloak
+    this.username = 'admin';
+    this.password = 'admin';
     this.login();
   }
 }

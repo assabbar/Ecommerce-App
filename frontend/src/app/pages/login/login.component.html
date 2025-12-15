@@ -19,15 +19,49 @@
       <h2>Welcome Back</h2>
       <p class="login-subtitle">Sign in to your account to continue shopping</p>
       
+      <form (ngSubmit)="login()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            [(ngModel)]="username" 
+            name="username"
+            placeholder="Enter your username"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            [(ngModel)]="password" 
+            name="password"
+            placeholder="Enter your password"
+            class="form-input"
+          />
+        </div>
+
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Login
+        </button>
+      </form>
+
+      <div class="login-divider">Or quick login as:</div>
+
       <div class="login-buttons">
-        <button class="btn-login user-login" (click)="login()">
-          <span class="icon">👤</span>
-          <span class="text">Login as User</span>
+        <button type="button" class="btn-quick" (click)="login()">
+          User
         </button>
         
-        <button class="btn-login admin-login" (click)="loginAsAdmin()">
-          <span class="icon">⚙️</span>
-          <span class="text">Login as Admin</span>
+        <button type="button" class="btn-quick admin" (click)="loginAsAdmin()">
+          Admin
         </button>
       </div>
 
@@ -44,11 +78,6 @@
           <p>Password: admin</p>
         </div>
       </div>
-
-      <p class="login-note">
-        Both buttons redirect to the same Keycloak login page. 
-        Use your credentials to login based on your role.
-      </p>
     </div>
   </div>
 </div>
