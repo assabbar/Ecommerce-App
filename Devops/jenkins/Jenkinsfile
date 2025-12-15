@@ -6,6 +6,15 @@ pipeline {
         timeout(time: 90, unit: 'MINUTES')
     }
 
+    environment {
+        // Control flags for each stage
+        RUN_BACKEND_UNIT_TESTS = 'true'
+        RUN_FRONTEND_UNIT_TESTS = 'false'
+        RUN_BACKEND_INTEGRATION_TESTS = 'true'
+        RUN_BUILD_DOCKER_IMAGES = 'true'
+        RUN_FULL_STACK_TEST = 'true'
+    }
+
     stages {
         stage('Checkout') {
             agent any
@@ -18,6 +27,9 @@ pipeline {
         }
 
         stage('Backend Unit Tests') {
+            when {
+                expression { return env.RUN_BACKEND_UNIT_TESTS == 'true' }
+            }
             agent {
                 docker {
                     image 'maven:3.9-eclipse-temurin-21'
@@ -44,6 +56,9 @@ pipeline {
         }
 
         stage('Frontend Unit Tests') {
+            when {
+                expression { return env.RUN_FRONTEND_UNIT_TESTS == 'true' }
+            }
             agent {
                 docker {
                     image 'node:20-alpine'
@@ -58,13 +73,16 @@ pipeline {
                         apk add --no-cache chromium
                         export CHROME_BIN=/usr/bin/chromium-browser
                         npm ci --legacy-peer-deps
-                        npm test -- --browsers=ChromiumHeadless --watch=false --no-sandbox
+                        npm test -- --browsers=ChromiumHeadless --watch=false
                     '''
                 }
             }
         }
 
         stage('Backend Integration Tests with Databases') {
+            when {
+                expression { return env.RUN_BACKEND_INTEGRATION_TESTS == 'true' }
+            }
             agent {
                 docker {
                     image 'maven:3.9-eclipse-temurin-21'
@@ -89,6 +107,9 @@ pipeline {
         }
 
         stage('Build Docker Images') {
+            when {
+                expression { return env.RUN_BUILD_DOCKER_IMAGES == 'true' }
+            }
             agent {
                 docker {
                     image 'docker:latest'
@@ -116,6 +137,9 @@ pipeline {
         }
 
         stage('Full Stack Integration Test') {
+            when {
+                expression { return env.RUN_FULL_STACK_TEST == 'true' }
+            }
             agent {
                 docker {
                     image 'docker:latest'
