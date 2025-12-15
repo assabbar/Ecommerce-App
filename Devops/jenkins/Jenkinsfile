@@ -57,9 +57,8 @@ pipeline {
                         cd frontend
                         apk add --no-cache chromium
                         export CHROME_BIN=/usr/bin/chromium-browser
-                        export CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage --no-sandbox"
                         npm ci --legacy-peer-deps
-                        npm test -- --browsers=ChromiumHeadless --watch=false
+                        npm test -- --browsers=ChromiumHeadless --watch=false --no-sandbox
                     '''
                 }
             }
