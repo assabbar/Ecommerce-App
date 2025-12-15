@@ -36,7 +36,10 @@ pipeline {
             steps {
                 script {
                     echo '====== Backend Unit Tests ======'
-                    sh 'cd ${BACKEND_DIR}; mvn clean test -q || true'
+                    sh '''
+                        cd ${BACKEND_DIR}
+                        mvn clean test -q
+                    '''
                 }
             }
         }
@@ -51,7 +54,11 @@ pipeline {
             steps {
                 script {
                     echo '====== Frontend Unit Tests ======'
-                    sh 'cd ${FRONTEND_DIR}; npm install --legacy-peer-deps; npm test -- --watch=false --browsers=ChromeHeadless || true'
+                    sh '''
+                        cd ${FRONTEND_DIR}
+                        npm ci --legacy-peer-deps
+                        npm test -- --watch=false --browsers=ChromeHeadless
+                    '''
                 }
             }
         }
@@ -100,16 +107,11 @@ pipeline {
     }
 
     post {
-        always {
-            node('any') {
-                sh 'docker compose down -v || true'
-            }
-        }
         success {
-            echo 'Pipeline Success!'
+            echo '✓ Pipeline Success!'
         }
         failure {
-            echo 'Pipeline Failed!'
+            echo '✗ Pipeline Failed!'
         }
     }
 }
