@@ -64,26 +64,48 @@ pipeline {
                         
                         cd ${FRONTEND_DIR}
                         npm ci --legacy-peer-deps
-                        npm test -- --watch=false --browsers=ChromeHeadless
+                        
+                        # Create custom Karma launcher for root
+                        cat >> karma.conf.js << 'EOF'
+
+module.exports = function(config) {
+  config.set({
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu'
+        ]
+      }
+    }
+  });
+};
+EOF
+                        
+                        # Run tests with custom launcher
+                        npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
                     '''
                 }
             }
         }
 
-        stage('Build Backend') {
-            agent {
-                docker {
-                    image 'maven:3.9-eclipse-temurin-21'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
-            steps {
-                script {
-                    echo '====== Building Backend ======'
-                    sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
-                }
-            }
-        }
+        // stage('Build Backend') {
+        //     agent {
+        //         docker {
+        //             image 'maven:3.9-eclipse-temurin-21'
+        //             args '-v /var/run/docker.sock:/var/run/docker.sock'
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             echo '====== Building Backend ======'
+        //             sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
+        //         }
+        //     }
+        // }
 
         stage('Docker Build & Integration Tests') {
             agent {
