@@ -1,4 +1,4 @@
-﻿pipeline {
+pipeline {
     agent none
 
     options {
@@ -21,7 +21,7 @@
             steps {
                 script {
                     echo '====== Checking out code ======'
-                    checkout scm 
+                    checkout scm
                 }
             }
         }
@@ -36,11 +36,7 @@
             steps {
                 script {
                     echo '====== Backend Unit Tests ======'
-                    sh '''
-                        cd ${BACKEND_DIR}
-                        mvn clean test -q
-                        echo "✓ Backend unit tests completed!"
-                    '''
+                    sh 'cd ${BACKEND_DIR}; mvn clean test -q'
                 }
             }
         }
@@ -55,12 +51,7 @@
             steps {
                 script {
                     echo '====== Frontend Unit Tests ======'
-                    sh '''
-                        cd ${FRONTEND_DIR}
-                        npm install --legacy-peer-deps
-                        npm test -- --watch=false --browsers=ChromeHeadless || echo "Frontend tests completed"
-                        echo "✓ Frontend unit tests completed!"
-                    '''
+                    sh 'cd ${FRONTEND_DIR}; npm install --legacy-peer-deps; npm test -- --watch=false --browsers=ChromeHeadless || true'
                 }
             }
         }
@@ -75,11 +66,7 @@
             steps {
                 script {
                     echo '====== Building Backend ======'
-                    sh '''
-                        cd ${BACKEND_DIR}
-                        mvn clean package -DskipTests -q
-                        echo "✓ Backend build completed!"
-                    '''
+                    sh 'cd ${BACKEND_DIR}; mvn clean package -DskipTests -q'
                 }
             }
         }
@@ -95,28 +82,17 @@
                 script {
                     echo '====== Docker Build & Integration Tests ======'
                     sh '''
-                        apk add --no-cache docker-compose curl jq bash
-                        
-                        echo "Building Docker images..."
+                        apk add --no-cache docker-compose curl bash
                         docker compose build
-                        
-                        echo "Starting infrastructure..."
                         docker compose up -d mongodb mysql zookeeper broker schema-registry
                         sleep 30
-                        
-                        echo "Starting all microservices..."
                         docker compose up -d
                         sleep 45
-                        
-                        echo "Running integration tests..."
                         curl -f ${PRODUCT_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${ORDER_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${INVENTORY_SERVICE_URL}/actuator/health || exit 1
                         curl -f ${API_GATEWAY_URL}/actuator/health || exit 1
-                        echo "✓ All services healthy"
-                        
                         docker compose down -v
-                        echo "✓ Integration tests completed!"
                     '''
                 }
             }
@@ -128,10 +104,10 @@
             sh 'docker compose down -v || true'
         }
         success {
-            echo '✓ Pipeline Success!'
+            echo 'Pipeline Success!'
         }
         failure {
-            echo '✗ Pipeline Failed!'
+            echo 'Pipeline Failed!'
         }
     }
 }
