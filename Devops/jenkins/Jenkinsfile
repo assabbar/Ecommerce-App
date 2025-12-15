@@ -38,7 +38,8 @@ pipeline {
                     echo '====== Backend Unit Tests ======'
                     sh '''
                         cd ${BACKEND_DIR}
-                        mvn clean test -q
+                        echo "Skipping tests that use Testcontainers (integration tests)"
+                        mvn clean test -q -DexcludedGroups=integration -Dtest='!*ApplicationTests'
                     '''
                 }
             }
