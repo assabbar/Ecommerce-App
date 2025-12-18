@@ -15,7 +15,7 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
-        timeout(time: 120, unit: 'MINUTES')
+        timeout(time: 180, unit: 'MINUTES')
     }
 
     stages {
@@ -79,14 +79,16 @@ pipeline {
             steps {
                 script {
                     echo '====== Building Docker Images ======'
-                    sh '''
-                        echo "Building all service images..."
-                        docker compose build
-                        
-                        echo ""
-                        echo "Images built successfully:"
-                        docker images | grep malak || true
-                    '''
+                    retry(2) {
+                        sh '''
+                            echo "Building all service images..."
+                            docker compose build --progress=plain
+                            
+                            echo ""
+                            echo "Images built successfully:"
+                            docker images | grep malak || true
+                        '''
+                    }
                 }
             }
         }
