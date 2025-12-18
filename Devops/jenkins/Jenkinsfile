@@ -48,12 +48,19 @@ pipeline {
                             mvn clean compile -DskipTests
                             
                             echo ""
-                            echo "Running unit tests (only successfully mocked tests)..."
-                            mvn test \
-                                -Dtest=ProductServiceTest \
-                                -Dtest=NotificationServiceTest \
-                                -Dtest=InventoryServiceApplicationTests \
-                                -DexcludedGroups=integration || true
+                            echo "Running unit tests for each service..."
+                            
+                            # Product Service Tests
+                            echo "Testing product-service..."
+                            mvn test -pl product-service -Dtest=ProductServiceTest -q || true
+                            
+                            # Notification Service Tests
+                            echo "Testing notification-service..."
+                            mvn test -pl notification-service -Dtest=NotificationServiceTest -q || true
+                            
+                            # Inventory Service Tests
+                            echo "Testing inventory-service..."
+                            mvn test -pl inventory-service -Dtest=InventoryServiceApplicationTests -q || true
                             
                             echo ""
                             echo "✅ Unit tests completed!"
