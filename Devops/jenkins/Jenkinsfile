@@ -18,6 +18,24 @@ pipeline {
         timeout(time: 180, unit: 'MINUTES')
     }
 
+    parameters {
+        booleanParam(
+            name: 'SKIP_DOCKER_BUILD',
+            defaultValue: false,
+            description: 'Skip Docker image build stage (use cached images)'
+        )
+        booleanParam(
+            name: 'SKIP_INTEGRATION_TESTS',
+            defaultValue: false,
+            description: 'Skip full stack integration tests'
+        )
+        booleanParam(
+            name: 'SKIP_ACR_PUSH',
+            defaultValue: false,
+            description: 'Skip pushing images to Azure Container Registry'
+        )
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -76,13 +94,71 @@ pipeline {
         }
 
         stage('Build Docker Images') {
+            when {
+                expression { !params.SKIP_DOCKER_BUILD }
+            }
             steps {
                 script {
                     echo '====== Building Docker Images ======'
-                    retry(2) {
+                    
+                    // Create Maven settings.xml for container with retry logic
+                    sh '''
+                        mkdir -p backend/.docker
+                        cat > backend/.docker/maven-settings.xml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirrors>
+        <!-- Use Aliyun mirror as primary -->
+        <mirror>
+            <id>aliyun</id>
+            <name>Aliyun Maven Mirror</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+        <!-- Fallback to Maven Central -->
+        <mirror>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+        </repository>
+    </repositories>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.wagon.http.connectTimeout>60000</maven.wagon.http.connectTimeout>
+                <maven.wagon.http.readTimeout>60000</maven.wagon.http.readTimeout>
+                <maven.wagon.rto>60000</maven.wagon.rto>
+            </properties>
+        </profile>
+    </profiles>
+</settings>
+EOF
+                    '''
+                    
+                    retry(3) {
                         sh '''
-                            echo "Building all service images..."
-                            docker compose build --progress=plain
+                            echo "Attempt to build Docker images with increased timeouts..."
+                            docker compose build \
+                                --progress=plain \
+                                --build-arg MAVEN_OPTS="-Dmaven.wagon.http.connectTimeout=60000 -Dmaven.wagon.http.readTimeout=60000"
                             
                             echo ""
                             echo "Images built successfully:"
@@ -94,6 +170,9 @@ pipeline {
         }
 
         stage('Full Stack Integration Tests') {
+            when {
+                expression { !params.SKIP_INTEGRATION_TESTS }
+            }
             steps {
                 script {
                     echo '====== Running Full Stack Integration Tests ======'
@@ -166,6 +245,9 @@ pipeline {
         }
 
         stage('Tag and Push Images to ACR') {
+            when {
+                expression { !params.SKIP_ACR_PUSH }
+            }
             steps {
                 script {
                     echo '====== Tagging and Pushing Images to ACR ======'
