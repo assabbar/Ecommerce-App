@@ -150,7 +150,10 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://root:password@mongodb:27017/product-service?authSource=admin
+      UPLOAD_DIR: /app/uploads/images
       LOGGING_LEVEL_ROOT: INFO
+    volumes:
+      - ./uploads/images:/app/uploads/images
     depends_on:
       - mongodb
     networks:
@@ -223,12 +226,9 @@ services:
     ports:
       - "9000:9000"
     environment:
-      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: product-service
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://product-service:8080
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/product/**
-      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: order-service
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://order-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/order/**
+      PRODUCT_SERVICE_URL: http://product-service:8080
+      ORDER_SERVICE_URL: http://order-service:8081
+      INVENTORY_SERVICE_URL: http://inventory-service:8082
       LOGGING_LEVEL_ROOT: INFO
     depends_on:
       - product-service
@@ -243,7 +243,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - "3000:80"
+      - "4200:80"
     depends_on:
       - api-gateway
     networks:
