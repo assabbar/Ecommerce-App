@@ -2,7 +2,6 @@ package com.techie.microservices.order.service;
 
 import com.techie.microservices.order.client.InventoryClient;
 import com.techie.microservices.order.dto.OrderRequest;
-import com.techie.microservices.order.dto.UserDetails;
 import com.techie.microservices.order.event.OrderPlacedEvent;
 import com.techie.microservices.order.model.Order;
 import com.techie.microservices.order.repository.OrderRepository;
@@ -38,12 +37,11 @@ class OrderServiceTest {
     private OrderService orderService;
 
     private OrderRequest orderRequest;
-    private UserDetails userDetails;
 
     @BeforeEach
     void setUp() {
-        userDetails = new UserDetails("john@example.com", "John", "Doe");
-        orderRequest = new OrderRequest("SKU-001", 5, new BigDecimal("29.99"), userDetails);
+        // OrderRequest with null userDetails for mocking
+        orderRequest = new OrderRequest(null, null, "SKU-001", new BigDecimal("29.99"), 5, null);
     }
 
     @Test
@@ -108,7 +106,7 @@ class OrderServiceTest {
     @Test
     void placeOrder_WithLargeQuantity_ShouldCalculatePriceCorrectly() {
         // Arrange
-        OrderRequest largeOrderRequest = new OrderRequest("SKU-002", 100, new BigDecimal("99.99"), userDetails);
+        OrderRequest largeOrderRequest = new OrderRequest(null, null, "SKU-002", new BigDecimal("99.99"), 100, null);
         when(inventoryClient.isInStock("SKU-002", 100)).thenReturn(true);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -126,7 +124,7 @@ class OrderServiceTest {
     @Test
     void placeOrder_WithMinimumQuantity_ShouldSucceed() {
         // Arrange
-        OrderRequest minOrderRequest = new OrderRequest("SKU-003", 1, new BigDecimal("10.00"), userDetails);
+        OrderRequest minOrderRequest = new OrderRequest(null, null, "SKU-003", new BigDecimal("10.00"), 1, null);
         when(inventoryClient.isInStock("SKU-003", 1)).thenReturn(true);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

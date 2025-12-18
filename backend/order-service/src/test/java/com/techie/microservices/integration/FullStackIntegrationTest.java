@@ -190,9 +190,7 @@ public class FullStackIntegrationTest {
         .when()
             .post("/api/orders")
         .then()
-            .statusCode(400)
-            .or()
-            .statusCode(404);
+            .statusCode(anyOf(equalTo(400), equalTo(404)));
     }
 
     @Test
@@ -202,9 +200,7 @@ public class FullStackIntegrationTest {
         when()
             .get("/products")
         .then()
-            .statusCode(200)
-            .or()
-            .statusCode(404); // Might be 404 if endpoint not exposed through gateway
+            .statusCode(anyOf(equalTo(200), equalTo(404))); // Might be 404 if endpoint not exposed through gateway
     }
 
     @Test
@@ -259,9 +255,7 @@ public class FullStackIntegrationTest {
         .when()
             .get("/")
         .then()
-            .statusCode(200)
-            .or()
-            .statusCode(304); // Not modified
+            .statusCode(anyOf(equalTo(200), equalTo(304))); // Not modified
     }
 
     @Test
