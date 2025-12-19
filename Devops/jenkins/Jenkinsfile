@@ -53,6 +53,22 @@ pipeline {
             }
         }
 
+        stage('Cleanup Previous Containers') {
+            steps {
+                script {
+                    echo '====== Cleaning up orphan containers ======'
+                    sh '''
+                        cd Devops/jenkins
+                        # Remove any orphan containers from previous test runs
+                        docker compose -f docker-compose.test.yml down -v --remove-orphans 2>/dev/null || true
+                        
+                        # Clean up dangling images and volumes
+                        docker volume prune -f --filter "label!=keep" 2>/dev/null || true
+                    '''
+                }
+            }
+        }
+
         stage('Backend Unit Tests') {
             agent {
                 docker {
@@ -136,10 +152,55 @@ pipeline {
                             cd Devops/jenkins
                             docker compose -f docker-compose.test.yml up -d
                             
-                            echo "Waiting for services to be healthy (90 seconds)..."
-                            sleep 90
+                            echo "Waiting for critical services to be healthy..."
                             
-                            echo "Checking service health..."
+                            # Wait for MySQL
+                            echo "  ⏳ Waiting for MySQL..."
+                            for i in {1..60}; do
+                              docker compose -f docker-compose.test.yml exec -T mysql mysqladmin ping -u root -pmysql >/dev/null 2>&1 && break
+                              sleep 2
+                            done
+                            
+                            # Wait for MongoDB
+                            echo "  ⏳ Waiting for MongoDB..."
+                            for i in {1..60}; do
+                              docker compose -f docker-compose.test.yml exec -T mongodb mongo --eval "db.adminCommand('ping')" >/dev/null 2>&1 && break
+                              sleep 2
+                            done
+                            
+                            # Wait for Zookeeper
+                            echo "  ⏳ Waiting for Zookeeper..."
+                            for i in {1..60}; do
+                              docker compose -f docker-compose.test.yml exec -T zookeeper nc -z localhost 2181 >/dev/null 2>&1 && break
+                              sleep 2
+                            done
+                            
+                            # Wait for Kafka
+                            echo "  ⏳ Waiting for Kafka..."
+                            for i in {1..60}; do
+                              docker compose -f docker-compose.test.yml exec -T kafka kafka-broker-api-versions.sh --bootstrap-servers kafka:9092 >/dev/null 2>&1 && break
+                              sleep 2
+                            done
+                            
+                            # Wait for microservices to be healthy
+                            echo "  ⏳ Waiting for microservices..."
+                            SERVICES=("product-service" "inventory-service" "order-service" "api-gateway" "frontend")
+                            for service in "${SERVICES[@]}"; do
+                              for i in {1..60}; do
+                                if [ "$service" = "frontend" ]; then
+                                  STATUS=$(docker compose -f docker-compose.test.yml exec -T "$service" curl -s -o /dev/null -w "%{http_code}" http://localhost:80/ 2>/dev/null || echo "000")
+                                else
+                                  STATUS=$(docker compose -f docker-compose.test.yml exec -T "$service" curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
+                                fi
+                                if [ "$STATUS" = "200" ]; then
+                                  echo "    ✓ $service is healthy"
+                                  break
+                                fi
+                                sleep 2
+                              done
+                            done
+                            
+                            echo "Checking overall service health..."
                             docker compose -f docker-compose.test.yml ps
                         '''
                         

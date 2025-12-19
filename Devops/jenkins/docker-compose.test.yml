@@ -11,10 +11,11 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      timeout: 20s
-      retries: 10
-      interval: 10s
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmysql" ]
+      timeout: 5s
+      retries: 30
+      interval: 5s
+      start_period: 40s
 
   mongodb:
     image: mongo:7.0.5
@@ -25,10 +26,11 @@ services:
     ports:
       - "27017:27017"
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 40s
 
   # Kafka Stack
   zookeeper:
@@ -36,13 +38,15 @@ services:
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "2181" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 30s
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -61,7 +65,8 @@ services:
       test: [ "CMD", "kafka-broker-api-versions.sh", "--bootstrap-servers", "kafka:9092" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 30s
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
@@ -79,7 +84,8 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/subjects" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      start_period: 30s
 
   # Backend Services
   product-service:
@@ -98,7 +104,8 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 15s
-      timeout: 10s
+      timeout: 30
+      start_period: 60s0s
       retries: 5
 
   inventory-service:
@@ -119,7 +126,8 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
       interval: 15s
-      timeout: 10s
+      timeout: 30
+      start_period: 60s0s
       retries: 5
 
   order-service:
@@ -146,7 +154,8 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
       interval: 15s
-      timeout: 10s
+      timeout: 30
+      start_period: 60s0s
       retries: 5
 
   notification-service:
@@ -155,7 +164,7 @@ services:
       dockerfile: ./notification-service/Dockerfile
     container_name: notification-service
     depends_on:
-      kafka:
+      mailhog:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: notification-service
@@ -167,6 +176,9 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
       interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 60s15s
       timeout: 10s
       retries: 5
 
@@ -186,7 +198,8 @@ services:
       SPRING_APPLICATION_NAME: api-gateway
     ports:
       - "9000:9000"
-    healthcheck:
+    healthcheck30
+      start_period: 60s
       test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
       interval: 15s
       timeout: 10s
@@ -203,7 +216,8 @@ services:
         condition: service_healthy
     ports:
       - "3000:80"
-    healthcheck:
+    healthcheck30
+      start_period: 60s
       test: [ "CMD", "curl", "-f", "http://localhost:80/" ]
       interval: 15s
       timeout: 10s
@@ -215,7 +229,8 @@ services:
     container_name: mailhog
     ports:
       - "1025:1025"
-      - "8025:8025"
+      - "8025:815
+      start_period: 10s25"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8025/" ]
       interval: 10s
