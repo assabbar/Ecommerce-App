@@ -191,15 +191,69 @@ pipeline {
                     
                     retry(2) {
                         sh '''
-                            echo "Building with Docker BuildKit and cache mounts..."
+                            echo "Building with Docker BuildKit..."
                             echo "DOCKER_BUILDKIT=${DOCKER_BUILDKIT}"
                             
-                            # Build all images with BuildKit cache
-                            docker compose build --progress=plain
+                            # Build Product Service
+                            echo ""
+                            echo "Building product-service..."
+                            cd backend/product-service
+                            docker build -t malak-product-service:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ../..
+                            
+                            # Build Order Service
+                            echo ""
+                            echo "Building order-service..."
+                            cd backend/order-service
+                            docker build -t malak-order-service:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ../..
+                            
+                            # Build Inventory Service
+                            echo ""
+                            echo "Building inventory-service..."
+                            cd backend/inventory-service
+                            docker build -t malak-inventory-service:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ../..
+                            
+                            # Build Notification Service
+                            echo ""
+                            echo "Building notification-service..."
+                            cd backend/notification-service
+                            docker build -t malak-notification-service:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ../..
+                            
+                            # Build API Gateway
+                            echo ""
+                            echo "Building api-gateway..."
+                            cd backend/api-gateway
+                            docker build -t malak-api-gateway:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ../..
+                            
+                            # Build Frontend
+                            echo ""
+                            echo "Building frontend..."
+                            cd frontend
+                            docker build -t malak-frontend:latest \
+                                --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                --progress=plain .
+                            cd ..
                             
                             echo ""
-                            echo "✅ Images built successfully:"
-                            docker images | grep malak || true
+                            echo "Verifying images built successfully..."
+                            docker images --filter "reference=malak-*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+                            
+                            echo ""
+                            echo "✅ All Docker images built successfully!"
                         '''
                     }
                 }
@@ -318,10 +372,10 @@ pipeline {
         always {
             node('any') {
                 script {
-                    // Cleanup Docker resources
+                    // Cleanup unused images only (don't use system prune which kills containers)
                     sh '''
-                        echo "Cleaning up Docker resources..."
-                        docker system prune -f --volumes || true
+                        echo "Cleanup: Removing unused Docker images..."
+                        docker image prune -f || true
                     '''
                 }
             }
