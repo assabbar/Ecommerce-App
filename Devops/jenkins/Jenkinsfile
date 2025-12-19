@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Azure Container Registry
-        ACR_NAME = 'acrecomdev12161808'
+        ACR_NAME = 'acrecomdev12191331'
         ACR_LOGIN_SERVER = "${ACR_NAME}.azurecr.io"
         
         // Docker image version
@@ -275,6 +275,52 @@ pipeline {
             }
         }
 
+        stage('Test Azure Connectivity') {
+            when {
+                expression {
+                    return env.RUN_PUSH_TO_ACR == 'true'
+                }
+            }
+            agent any
+            steps {
+                script {
+                    echo '====== Test Azure Connectivity ======'
+                    
+                    withCredentials([azureServicePrincipal('azure-sp-ecom')]) {
+                        sh '''
+                            echo "Testing Azure CLI connection..."
+                            
+                            echo "Logging in with Service Principal..."
+                            az login --service-principal \
+                                --username $AZURE_CLIENT_ID \
+                                --password $AZURE_CLIENT_SECRET \
+                                --tenant $AZURE_TENANT_ID \
+                                --output none
+                            
+                            echo "✓ Successfully authenticated to Azure"
+                            
+                            echo ""
+                            echo "Setting subscription..."
+                            az account set --subscription $AZURE_SUBSCRIPTION_ID
+                            echo "✓ Subscription set"
+                            
+                            echo ""
+                            echo "Testing ACR login..."
+                            az acr login --name ${ACR_NAME} --expose-token
+                            echo "✓ ACR login successful"
+                            
+                            echo ""
+                            echo "Listing ACR repositories..."
+                            az acr repository list --name ${ACR_NAME} --output table || echo "No repositories yet"
+                            
+                            echo ""
+                            echo "✅ Azure connectivity test PASSED!"
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Push Images to ACR') {
             when {
                 expression {
@@ -385,14 +431,12 @@ pipeline {
             '''
         }
         always {
-            node('any') {
-                script {
-                    // Cleanup unused images only (don't use system prune which kills containers)
-                    sh '''
-                        echo "Cleanup: Removing unused Docker images..."
-                        docker image prune -f || true
-                    '''
-                }
+            script {
+                // Cleanup unused images only (don't use system prune which kills containers)
+                sh '''
+                    echo "Cleanup: Removing unused Docker images..."
+                    docker image prune -f || true
+                '''
             }
         }
     }
