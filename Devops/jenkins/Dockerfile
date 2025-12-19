@@ -11,6 +11,12 @@ RUN apt-get update && \
     apt-get install -y docker-ce-cli docker-compose-plugin && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Azure CLI
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
+    rm -rf /var/lib/apt/lists/*
+
 # Add jenkins user to docker group
 RUN groupadd -f docker && usermod -aG docker jenkins
 
