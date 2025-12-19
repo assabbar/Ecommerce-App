@@ -21,7 +21,7 @@ pipeline {
         RUN_FRONTEND_TESTS = 'true'
         RUN_INTEGRATION_TESTS = 'false'
         RUN_BUILD_IMAGES = 'true'
-        RUN_PUSH_TO_ACR = 'false'
+        RUN_PUSH_TO_ACR = 'true'
     }
 
     options {
@@ -431,7 +431,7 @@ pipeline {
             '''
         }
         always {
-            script {
+            node('any') {
                 // Cleanup unused images only (don't use system prune which kills containers)
                 sh '''
                     echo "Cleanup: Removing unused Docker images..."
