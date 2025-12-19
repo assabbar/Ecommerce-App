@@ -398,12 +398,15 @@ pipeline {
               ✓ Code Checkout from GitHub
               ✓ Backend Unit Tests
               ✓ Frontend Unit Tests
-              ✓ Integration Tests (docker-compose.test.yml)
               ✓ Docker Images Built
-              ✓ Images Pushed to ACR (if enabled)
+              ✓ Azure Connectivity Verified
+              ✓ Images Pushed to ACR
+            
+            All 6 services + frontend deployed to:
+              ACR: acrecomdev12191331.azurecr.io
             
             Next Steps:
-              1. Deploy to AKS
+              1. Deploy to AKS using Helm charts
               2. Run smoke tests
               3. Promote to production
             ================================================
@@ -429,15 +432,6 @@ pipeline {
             Check logs for details.
             ================================================
             '''
-        }
-        always {
-            node('any') {
-                // Cleanup unused images only (don't use system prune which kills containers)
-                sh '''
-                    echo "Cleanup: Removing unused Docker images..."
-                    docker image prune -f || true
-                '''
-            }
         }
     }
 }
