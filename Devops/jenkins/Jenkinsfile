@@ -87,11 +87,7 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-                }
-            }
+        }
         }
         
         stage('Frontend Unit Tests') {
@@ -180,11 +176,7 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
-                }
-            }
+        }
         }
         
         stage('Build Docker Images') {
@@ -326,12 +318,14 @@ pipeline {
             '''
         }
         always {
-            script {
-                // Cleanup Docker resources
-                sh '''
-                    echo "Cleaning up Docker resources..."
-                    docker system prune -f --volumes || true
-                '''
+            node('any') {
+                script {
+                    // Cleanup Docker resources
+                    sh '''
+                        echo "Cleaning up Docker resources..."
+                        docker system prune -f --volumes || true
+                    '''
+                }
             }
         }
     }
