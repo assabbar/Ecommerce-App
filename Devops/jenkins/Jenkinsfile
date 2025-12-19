@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
 
     environment {
         // Azure Container Registry
@@ -15,33 +15,24 @@ pipeline {
         // Enable Docker BuildKit for cache mounts
         DOCKER_BUILDKIT = '1'
         COMPOSE_DOCKER_CLI_BUILD = '1'
+        
+        // Control flags
+        RUN_BACKEND_TESTS = 'true'
+        RUN_FRONTEND_TESTS = 'true'
+        RUN_INTEGRATION_TESTS = 'true'
+        RUN_BUILD_IMAGES = 'true'
+        RUN_PUSH_TO_ACR = 'false'
     }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 180, unit: 'MINUTES')
-    }
-
-    parameters {
-        booleanParam(
-            name: 'SKIP_DOCKER_BUILD',
-            defaultValue: false,
-            description: 'Skip Docker image build stage (use cached images)'
-        )
-        booleanParam(
-            name: 'SKIP_INTEGRATION_TESTS',
-            defaultValue: false,
-            description: 'Skip full stack integration tests'
-        )
-        booleanParam(
-            name: 'SKIP_ACR_PUSH',
-            defaultValue: false,
-            description: 'Skip pushing images to Azure Container Registry'
-        )
+        timestamps()
     }
 
     stages {
         stage('Checkout') {
+            agent any
             steps {
                 script {
                     echo '====== Checkout Code from GitHub ======'
@@ -53,7 +44,11 @@ pipeline {
             }
         }
 
-        stage('Backend Unit Tests') {
+        stagwhen {
+                expression {
+                    return env.RUN_BACKEND_TESTS == 'true'
+                }
+            }
             agent {
                 docker {
                     image 'maven:3.9-eclipse-temurin-21'
@@ -63,7 +58,9 @@ pipeline {
             }
             steps {
                 script {
-                    echo '====== Running Unit Tests ======'
+                    echo '====== Backend Unit Testing Stage ======'
+                    echo 'Running backend unit tests...'
+                    
                     dir('backend') {
                         sh '''
                             echo "Compiling all services..."
@@ -85,76 +82,54 @@ pipeline {
                             mvn test -pl inventory-service -Dtest=InventoryServiceApplicationTests -q || true
                             
                             echo ""
-                            echo "✅ Unit tests completed!"
+                            echo "✅ Backend unit tests completed!"
                         '''
                     }
                 }
             }
             post {
-                always {
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+               Integration Tests') {
+            when {
+                expression {
+                    return env.RUN_INTEGRATION_TESTS == 'true'
                 }
             }
-        }
-
-        stage('Build Docker Images') {
-            when {
-                expression { !params.SKIP_DOCKER_BUILD }
-            }
+            agent any
             steps {
                 script {
-                    echo '====== Building Docker Images with BuildKit Cache ======'
+                    echo '====== Integration Testing Stage ======'
+                    echo 'Starting services with Docker Compose and running integration tests...'
                     
-                    retry(3) {
-                        sh '''
-                            echo "Building with Docker BuildKit and cache mounts..."
-                            echo "DOCKER_BUILDKIT=${DOCKER_BUILDKIT}"
-                            
-                            # Build all images with BuildKit cache
-                            docker compose build --progress=plain
-                            
-                            echo ""
-                            echo "✅ Images built successfully:"
-                            docker images | grep malak || true
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Full Stack Integration Tests') {
-            when {
-                expression { !params.SKIP_INTEGRATION_TESTS }
-            }
-            steps {
-                script {
-                    echo '====== Running Full Stack Integration Tests ======'
                     try {
-                        // Start test environment
                         sh '''
                             echo "Starting test environment..."
                             cd Devops/jenkins
                             docker compose -f docker-compose.test.yml up -d --remove-orphans
                             
-                            echo "Waiting for services (60 seconds)..."
+                            echo "Waiting for services to start (60 seconds)..."
                             sleep 60
                             
                             echo "Service status:"
                             docker compose -f docker-compose.test.yml ps
+                            
+                            echo ""
+                            echo "Checking service health..."
+                            docker compose -f docker-compose.test.yml logs --tail=50
                         '''
                         
                         // Run integration tests
                         dir('backend') {
                             sh '''
-                                echo "Running full stack integration tests..."
+                                echo "Running integration tests..."
                                 mvn test -Dtest=FullStackIntegrationTest -pl order-service || true
+                                
+                                echo "✅ Integration tests completed!"
                             '''
                         }
                         
-                        echo "✅ Integration tests stage completed!"
-                        
                     } catch (Exception e) {
                         echo "⚠️  Integration tests failed: ${e.message}"
+                        currentBuild.result = 'UNSTABLE'
                     } finally {
                         // Cleanup test environment
                         sh '''
@@ -171,18 +146,74 @@ pipeline {
                 }
             }
         }
-
-        stage('Login to Azure ACR') {
+        
+        stage('Build Docker Images') {
+            when {
+                expression {
+                    return env.RUN_BUILD_IMAGES == 'true'
+                }
+            }
+            agent any
+            stePush Images to ACR') {
+            when {
+                expression {
+                    return env.RUN_PUSH_TO_ACR == 'true'
+                }
+            }
+            agent any
             steps {
                 script {
-                    echo '====== Logging in to Azure Container Registry ======'
+                    echo '====== Push Images to Azure Container Registry ======'
+                    
+                    // Login to Azure ACR
                     withCredentials([azureServicePrincipal('azure-sp-ecom')]) {
                         sh '''
-                            # Login to Azure
+                            echo "Logging in to Azure..."
                             az login --service-principal \
                                 --username $AZURE_CLIENT_ID \
                                 --password $AZURE_CLIENT_SECRET \
                                 --tenant $AZURE_TENANT_ID
+                            
+                            # Set subscription
+                            az account set --subscription $AZURE_SUBSCRIPTION_ID
+                            
+                            # Login to ACR
+                            az acr login --name ${ACR_NAME}
+                            echo "✅ Successfully logged in to ACR: ${ACR_LOGIN_SERVER}"
+                        '''
+                    }
+                    
+                    // Tag and push images
+                    sh '''
+                        echo "Tagging and pushing images to ACR..."
+                        
+                        # Tag and push each service image
+                        for service in ${SERVICES}; do
+                            echo "Processing ${service}..."
+                            
+                            # Tag with build number and latest
+                            docker tag malak-${service}:latest ${ACR_LOGIN_SERVER}/${service}:${IMAGE_TAG}
+                            docker tag malak-${service}:latest ${ACR_LOGIN_SERVER}/${service}:latest
+                            
+                            # Push both tags
+                            echo "Pushing ${service}:${IMAGE_TAG}..."
+                            docker push ${ACR_LOGIN_SERVER}/${service}:${IMAGE_TAG}
+                            
+                            echo "Pushing ${service}:latest..."
+                            docker push ${ACR_LOGIN_SERVER}/${service}:latest
+                            
+                            echo "✅ ${service} pushed successfully!"
+                            echo ""
+                        done
+                        
+                        echo "================================================"
+                        echo "All images pushed to ACR successfully!"
+                        echo "================================================"
+                        
+                        # Verify images in ACR
+                        echo ""
+                        echo "Listing images in ACR..."
+                        az acr repository list --name ${ACR_NAME} --output tabl     --tenant $AZURE_TENANT_ID
                             
                             # Set subscription
                             az account set --subscription $AZURE_SUBSCRIPTION_ID
@@ -263,9 +294,10 @@ pipeline {
               ✓ Code Checkout from GitHub
               ✓ Backend Unit Tests
               ✓ Docker Images Built
-              ✓ Full Stack Integration Tests
-              ✓ Images Tagged and Pushed to ACR
-              ✓ ACR Images Verified
+              ✓ Frontend Unit Tests
+              ✓ Integration Tests (docker-compose.test.yml)
+              ✓ Docker Images Built
+              ✓ Images Pushed to ACR (if enabled)
             
             Next Steps:
               1. Deploy to AKS
@@ -284,12 +316,24 @@ pipeline {
             ================================================
             '''
         }
-        always {
-            // Cleanup
-            sh '''
-                echo "Cleaning up Docker resources..."
-                docker system prune -f || true
+        unstable {
+            echo '''
+            ================================================
+            ⚠️  CI/CD PIPELINE COMPLETED WITH WARNINGS
+            ================================================
+            
+            Some tests may have failed but build continued.
+            Check logs for details.
+            ================================================
             '''
         }
+        always {
+            script {
+                // Cleanup Docker resources
+                sh '''
+                    echo "Cleaning up Docker resources..."
+                    docker system prune -f --volumes || true
+                '''
+            }
     }
 }
