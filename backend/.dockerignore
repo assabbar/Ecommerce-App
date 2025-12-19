@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+Devops/jenkins
+Devops/terraform
+Devops/scripts
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Build artifacts
+**/target/
+**/build/
+**/dist/
+**/out/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+**/test-results/
+**/coverage/
+
+# Docs
+README.md
+*.md
+docs/
+
+# Data
+data/
+uploads/
