@@ -88,7 +88,6 @@ pipeline {
                 }
             }
         }
-        }
         
         stage('Frontend Unit Tests') {
             when {
@@ -176,7 +175,6 @@ pipeline {
                     }
                 }
             }
-        }
         }
         
         stage('Build Docker Images') {
