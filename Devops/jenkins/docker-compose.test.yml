@@ -109,7 +109,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ORDER_SERVICE_BASEURL: http://inventory-service:8082
     ports:
-      - "18081:8081"
+      - "18084:8081"
 
   notification-service:
     build:
