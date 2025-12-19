@@ -210,59 +210,58 @@ pipeline {
                             echo "Building with Docker BuildKit..."
                             echo "DOCKER_BUILDKIT=${DOCKER_BUILDKIT}"
                             
+                            # Build all services from backend/ context (Dockerfiles expect this)
+                            cd backend
+                            
                             # Build Product Service
                             echo ""
                             echo "Building product-service..."
-                            cd backend/product-service
                             docker build -t malak-product-service:latest \
+                                -f product-service/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --progress=plain .
-                            cd ../..
                             
                             # Build Order Service
                             echo ""
                             echo "Building order-service..."
-                            cd backend/order-service
                             docker build -t malak-order-service:latest \
+                                -f order-service/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --progress=plain .
-                            cd ../..
                             
                             # Build Inventory Service
                             echo ""
                             echo "Building inventory-service..."
-                            cd backend/inventory-service
                             docker build -t malak-inventory-service:latest \
+                                -f inventory-service/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --progress=plain .
-                            cd ../..
                             
                             # Build Notification Service
                             echo ""
                             echo "Building notification-service..."
-                            cd backend/notification-service
                             docker build -t malak-notification-service:latest \
+                                -f notification-service/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --progress=plain .
-                            cd ../..
                             
                             # Build API Gateway
                             echo ""
                             echo "Building api-gateway..."
-                            cd backend/api-gateway
                             docker build -t malak-api-gateway:latest \
+                                -f api-gateway/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
                                 --progress=plain .
-                            cd ../..
                             
-                            # Build Frontend
+                            cd ..
+                            
+                            # Build Frontend from frontend/ context
                             echo ""
                             echo "Building frontend..."
-                            cd frontend
                             docker build -t malak-frontend:latest \
+                                -f frontend/Dockerfile \
                                 --build-arg BUILDKIT_INLINE_CACHE=1 \
-                                --progress=plain .
-                            cd ..
+                                --progress=plain frontend
                             
                             echo ""
                             echo "Verifying images built successfully..."
