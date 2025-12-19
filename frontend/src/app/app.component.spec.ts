@@ -10,7 +10,12 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     mockOidcSecurityService = jasmine.createSpyObj('OidcSecurityService', ['checkAuth']);
-    mockOidcSecurityService.checkAuth.and.returnValue(of({ isAuthenticated: false }));
+    mockOidcSecurityService.checkAuth.and.returnValue(of({ 
+      isAuthenticated: false,
+      userData: null,
+      accessToken: '',
+      idToken: ''
+    }));
 
     await TestBed.configureTestingModule({
       imports: [AppComponent],
@@ -35,7 +40,12 @@ describe('AppComponent', () => {
   });
 
   it('should check authentication on init', () => {
-    mockOidcSecurityService.checkAuth.and.returnValue(of({ isAuthenticated: true }));
+    mockOidcSecurityService.checkAuth.and.returnValue(of({ 
+      isAuthenticated: true,
+      userData: { name: 'Test User' },
+      accessToken: 'test-token',
+      idToken: 'test-id-token'
+    }));
     
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
@@ -44,7 +54,12 @@ describe('AppComponent', () => {
   });
 
   it('should handle unauthenticated state', () => {
-    mockOidcSecurityService.checkAuth.and.returnValue(of({ isAuthenticated: false }));
+    mockOidcSecurityService.checkAuth.and.returnValue(of({ 
+      isAuthenticated: false,
+      userData: null,
+      accessToken: '',
+      idToken: ''
+    }));
     
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();

@@ -25,8 +25,16 @@ module.exports = function (config) {
       ]
     },
     reporters: ['progress', 'kjhtml'],
-    browsers: ['Chrome'],
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+    autoWatch: false,
+    browsers: process.env.CI ? ['ChromeHeadless'] : ['Chrome'],
     customLaunchers: {
+      ChromeHeadless: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      },
       ChromiumHeadless: {
         base: 'ChromiumHeadless',
         flags: [
