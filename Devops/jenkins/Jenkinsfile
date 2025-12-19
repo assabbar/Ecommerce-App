@@ -112,8 +112,8 @@ pipeline {
                             echo "Installing dependencies..."
                             npm ci --legacy-peer-deps || true
                             
-                            echo "Running frontend tests..."
-                            npm test || true
+                            echo "Running frontend tests in CI mode..."
+                            CI=true npm test -- --watch=false --code-coverage 2>&1 | tail -50 || true
                             
                             echo ""
                             echo "✅ Frontend unit tests completed!"
