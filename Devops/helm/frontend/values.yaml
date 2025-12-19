@@ -1,0 +1,36 @@
+replicaCount: 3
+image:
+  repository: acrecomdev12161808.azurecr.io/frontend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+serviceAccount:
+  name: "frontend-sa"
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 80
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 30
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 15
+env:
+  - name: API_GATEWAY_URL
+    value: "http://api-gateway.backend.svc.cluster.local:8080"
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
