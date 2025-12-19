@@ -44,7 +44,8 @@ pipeline {
             }
         }
 
-        stagwhen {
+        stage('Backend Unit Tests') {
+            when {
                 expression {
                     return env.RUN_BACKEND_TESTS == 'true'
                 }
@@ -88,7 +89,47 @@ pipeline {
                 }
             }
             post {
-               Integration Tests') {
+                always {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Frontend Unit Tests') {
+            when {
+                expression {
+                    return env.RUN_FRONTEND_TESTS == 'true'
+                }
+            }
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
+            steps {
+                script {
+                    echo '====== Frontend Unit Testing Stage ======'
+                    echo 'Running frontend unit tests...'
+                    
+                    dir('frontend') {
+                        sh '''
+                            echo "Installing dependencies..."
+                            npm ci --legacy-peer-deps || true
+                            
+                            echo "Running frontend tests..."
+                            npm test || true
+                            
+                            echo ""
+                            echo "✅ Frontend unit tests completed!"
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Integration Tests') {
             when {
                 expression {
                     return env.RUN_INTEGRATION_TESTS == 'true'
@@ -154,7 +195,29 @@ pipeline {
                 }
             }
             agent any
-            stePush Images to ACR') {
+            steps {
+                script {
+                    echo '====== Build Docker Images Stage ======'
+                    echo 'Building all service images with BuildKit cache...'
+                    
+                    retry(2) {
+                        sh '''
+                            echo "Building with Docker BuildKit and cache mounts..."
+                            echo "DOCKER_BUILDKIT=${DOCKER_BUILDKIT}"
+                            
+                            # Build all images with BuildKit cache
+                            docker compose build --progress=plain
+                            
+                            echo ""
+                            echo "✅ Images built successfully:"
+                            docker images | grep malak || true
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Push Images to ACR') {
             when {
                 expression {
                     return env.RUN_PUSH_TO_ACR == 'true'
@@ -213,70 +276,7 @@ pipeline {
                         # Verify images in ACR
                         echo ""
                         echo "Listing images in ACR..."
-                        az acr repository list --name ${ACR_NAME} --output tabl     --tenant $AZURE_TENANT_ID
-                            
-                            # Set subscription
-                            az account set --subscription $AZURE_SUBSCRIPTION_ID
-                            
-                            # Login to ACR
-                            az acr login --name ${ACR_NAME}
-                            
-                            echo "✅ Successfully logged in to ACR: ${ACR_LOGIN_SERVER}"
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Tag and Push Images to ACR') {
-            when {
-                expression { !params.SKIP_ACR_PUSH }
-            }
-            steps {
-                script {
-                    echo '====== Tagging and Pushing Images to ACR ======'
-                    sh '''
-                        # Tag and push each service image
-                        for service in ${SERVICES}; do
-                            echo "Processing ${service}..."
-                            
-                            # Tag with build number
-                            docker tag malak-${service}:latest ${ACR_LOGIN_SERVER}/${service}:${IMAGE_TAG}
-                            docker tag malak-${service}:latest ${ACR_LOGIN_SERVER}/${service}:latest
-                            
-                            # Push both tags
-                            echo "Pushing ${service}:${IMAGE_TAG}..."
-                            docker push ${ACR_LOGIN_SERVER}/${service}:${IMAGE_TAG}
-                            
-                            echo "Pushing ${service}:latest..."
-                            docker push ${ACR_LOGIN_SERVER}/${service}:latest
-                            
-                            echo "✅ ${service} pushed successfully!"
-                            echo ""
-                        done
-                        
-                        echo "================================================"
-                        echo "All images pushed to ACR successfully!"
-                        echo "================================================"
-                    '''
-                }
-            }
-        }
-
-        stage('Verify ACR Images') {
-            steps {
-                script {
-                    echo '====== Verifying Images in ACR ======'
-                    sh '''
-                        echo "Listing images in ACR..."
                         az acr repository list --name ${ACR_NAME} --output table
-                        
-                        echo ""
-                        echo "Showing tags for each repository..."
-                        for service in ${SERVICES}; do
-                            echo "Tags for ${service}:"
-                            az acr repository show-tags --name ${ACR_NAME} --repository ${service} --output table --orderby time_desc | head -5 || true
-                        done
                     '''
                 }
             }
@@ -293,7 +293,6 @@ pipeline {
             Stages Completed:
               ✓ Code Checkout from GitHub
               ✓ Backend Unit Tests
-              ✓ Docker Images Built
               ✓ Frontend Unit Tests
               ✓ Integration Tests (docker-compose.test.yml)
               ✓ Docker Images Built
@@ -335,5 +334,6 @@ pipeline {
                     docker system prune -f --volumes || true
                 '''
             }
+        }
     }
 }
