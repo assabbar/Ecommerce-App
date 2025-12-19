@@ -19,7 +19,7 @@ pipeline {
         // Control flags
         RUN_BACKEND_TESTS = 'true'
         RUN_FRONTEND_TESTS = 'true'
-        RUN_INTEGRATION_TESTS = 'false'
+        RUN_INTEGRATION_TESTS = 'true'
         RUN_BUILD_IMAGES = 'true'
         RUN_PUSH_TO_ACR = 'true'
     }
@@ -123,70 +123,41 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {
+        stage('Integration Tests (Testcontainers)') {
             when {
                 expression {
                     return env.RUN_INTEGRATION_TESTS == 'true'
                 }
             }
-            agent any
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/root/.m2'
+                    reuseNode true
+                }
+            }
+            environment {
+                // For Docker Desktop (Windows/Mac)
+                TESTCONTAINERS_HOST_OVERRIDE = 'host.docker.internal'
+            }
             steps {
                 script {
-                    echo '====== Integration Testing Stage ======'
-                    echo 'Starting services with Docker Compose and running integration tests...'
+                    echo '====== Integration Testing Stage (Testcontainers) ======'
+                    echo 'Running integration tests with Testcontainers...'
                     
-                    try {
+                    dir('backend') {
                         sh '''
-                            set -e
-                            echo "Starting test environment..."
-                            cd Devops/jenkins
+                            echo "Running integration tests for all microservices..."
+                            echo "Testcontainers will automatically start MySQL, MongoDB, and Kafka containers"
+                            echo ""
                             
-                            echo "Checking if docker-compose.test.yml exists..."
-                            ls -la docker-compose.test.yml
-                            
-                            echo "Bringing down any existing containers..."
-                            docker compose -f docker-compose.test.yml down -v 2>/dev/null || true
-                            sleep 5
-                            
-                            echo "Starting services with docker compose up..."
-                            timeout 120 docker compose -f docker-compose.test.yml up -d --remove-orphans 2>&1 || true
-                            
-                            echo "Waiting for services to stabilize (30 seconds)..."
-                            sleep 30
-                            
-                            echo "Service status:"
-                            docker compose -f docker-compose.test.yml ps || true
+                            mvn verify \
+                              -pl order-service,inventory-service,product-service \
+                              -DskipITs=false \
+                              -q
                             
                             echo ""
-                            echo "Checking service logs (last 30 lines)..."
-                            docker compose -f docker-compose.test.yml logs --tail=30 || true
-                        '''
-                        
-                        // Run integration tests if services started
-                        dir('backend') {
-                            sh '''
-                                echo "Checking if services are running..."
-                                if [ "$(docker ps -q | wc -l)" -gt 0 ]; then
-                                    echo "Running integration tests..."
-                                    mvn test -Dtest=FullStackIntegrationTest -pl order-service || true
-                                else
-                                    echo "⚠️  Services not running, skipping integration tests"
-                                fi
-                                
-                                echo "✅ Integration tests stage completed!"
-                            '''
-                        }
-                        
-                    } catch (Exception e) {
-                        echo "⚠️  Integration tests stage error: ${e.message}"
-                        currentBuild.result = 'UNSTABLE'
-                    } finally {
-                        // Cleanup test environment
-                        sh '''
-                            echo "Cleaning up test environment..."
-                            cd Devops/jenkins
-                            docker compose -f docker-compose.test.yml down -v 2>/dev/null || true
-                            echo "✓ Cleanup complete"
+                            echo "✅ Integration tests completed!"
                         '''
                     }
                 }
