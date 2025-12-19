@@ -9,7 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_DATABASE: ecommerce_db
     ports:
-      - "3306:3306"
+      - "13306:3306"
 
   mongodb:
     image: mongo:7.0.5
@@ -18,7 +18,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
     ports:
-      - "27017:27017"
+      - "17017:27017"
 
   # Kafka Stack
   zookeeper:
@@ -28,7 +28,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "2181:2181"
+      - "12181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -41,7 +41,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
-      - "9092:9092"
+      - "19092:9092"
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
@@ -53,15 +53,15 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
     ports:
-      - "8081:8081"
+      - "18081:8081"
 
   # Mail Service for testing
   mailhog:
     image: mailhog/mailhog:v1.0.0
     container_name: mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "11025:1025"
+      - "18025:8025"
 
   # Backend Services
   product-service:
@@ -75,7 +75,7 @@ services:
       SPRING_APPLICATION_NAME: product-service
       SPRING_DATA_MONGODB_URI: mongodb://root:password@mongodb:27017/products?authSource=admin
     ports:
-      - "8080:8080"
+      - "18080:8080"
 
   inventory-service:
     build:
@@ -90,7 +90,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: mysql
     ports:
-      - "8082:8082"
+      - "18082:8082"
 
   order-service:
     build:
@@ -109,7 +109,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ORDER_SERVICE_BASEURL: http://inventory-service:8082
     ports:
-      - "8081:8081"
+      - "18081:8081"
 
   notification-service:
     build:
@@ -125,7 +125,7 @@ services:
       SPRING_MAIL_HOST: mailhog
       SPRING_MAIL_PORT: 1025
     ports:
-      - "8083:8083"
+      - "18083:8083"
 
   api-gateway:
     build:
@@ -139,7 +139,7 @@ services:
     environment:
       SPRING_APPLICATION_NAME: api-gateway
     ports:
-      - "9000:9000"
+      - "19000:9000"
 
   # Frontend
   frontend:
@@ -150,7 +150,7 @@ services:
     depends_on:
       - api-gateway
     ports:
-      - "3000:80"
+      - "13000:80"
 
 networks:
   default:
