@@ -1,8 +1,10 @@
-replicaCount: 3
+replicaCount: 1
 image:
-  repository: acrecomdev12161808.azurecr.io/api-gateway
+  repository: acrecomdev12191331.azurecr.io/api-gateway
   pullPolicy: IfNotPresent
   tag: "latest"
+imagePullSecrets:
+  - name: acr-credentials
 serviceAccount:
   name: "backend-sa"
 service:

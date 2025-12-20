@@ -1,9 +1,12 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: acrecomdev12161808.azurecr.io/order-service
+  repository: acrecomdev12191331.azurecr.io/order-service
   pullPolicy: IfNotPresent
   tag: "latest"
+
+imagePullSecrets:
+  - name: acr-credentials
 
 serviceAccount:
   create: false
