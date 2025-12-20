@@ -45,7 +45,7 @@ pipeline {
                         JENKINS_ENV_FILE="/var/jenkins_home/jenkins.env"
                         if [ -f "$JENKINS_ENV_FILE" ]; then
                             echo "Loading Azure configuration from jenkins.env..."
-                            source $JENKINS_ENV_FILE
+                            . $JENKINS_ENV_FILE
                             
                             echo ""
                             echo "✅ Azure Configuration Loaded:"
