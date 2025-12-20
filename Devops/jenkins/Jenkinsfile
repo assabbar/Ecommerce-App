@@ -41,9 +41,11 @@ pipeline {
                     echo '====== Setup Azure Configuration ======'
                     sh '''
                         # Load environment from generated jenkins.env (created by setup-azure-jenkins.sh)
-                        if [ -f "Devops/jenkins/jenkins.env" ]; then
+                        # jenkins.env is mounted as a volume in the Jenkins container at /var/jenkins_home/jenkins.env
+                        JENKINS_ENV_FILE="/var/jenkins_home/jenkins.env"
+                        if [ -f "$JENKINS_ENV_FILE" ]; then
                             echo "Loading Azure configuration from jenkins.env..."
-                            source Devops/jenkins/jenkins.env
+                            source $JENKINS_ENV_FILE
                             
                             echo ""
                             echo "✅ Azure Configuration Loaded:"
