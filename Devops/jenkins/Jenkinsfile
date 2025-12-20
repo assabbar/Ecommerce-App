@@ -541,17 +541,33 @@ pipeline {
                                 kubectl cluster-info
                                 
                                 echo ""
+                                echo "Setting up ACR credentials in namespaces..."
+                                export ACR_PASSWORD=$(az acr credential show \
+                                    --name $ACR_NAME \
+                                    --query "passwords[0].value" -o tsv)
+                                
+                                for NAMESPACE in $NAMESPACE_BACKEND $NAMESPACE_FRONTEND monitoring; do
+                                    kubectl delete secret acr-credentials -n $NAMESPACE --ignore-not-found=true
+                                    kubectl create secret docker-registry acr-credentials \
+                                        --docker-server=$ACR_LOGIN_SERVER \
+                                        --docker-username=$ACR_NAME \
+                                        --docker-password=$ACR_PASSWORD \
+                                        --docker-email="devops@ecom.local" \
+                                        -n $NAMESPACE
+                                done
+                                
+                                echo ""
                                 echo "Deploying services using Helm..."
                                 
                                 cd Devops/helm
                                 
-                                # Deploy each service
-                                helm upgrade --install product-service product-service/ -n $NAMESPACE_BACKEND
-                                helm upgrade --install order-service order-service/ -n $NAMESPACE_BACKEND
-                                helm upgrade --install inventory-service inventory-service/ -n $NAMESPACE_BACKEND
-                                helm upgrade --install notification-service notification-service/ -n $NAMESPACE_BACKEND
-                                helm upgrade --install api-gateway api-gateway/ -n $NAMESPACE_BACKEND
-                                helm upgrade --install frontend frontend/ -n $NAMESPACE_FRONTEND
+                                # Deploy each service with values files
+                                helm upgrade --install product-service product-service/ -n $NAMESPACE_BACKEND --values product-service/values.yaml
+                                helm upgrade --install order-service order-service/ -n $NAMESPACE_BACKEND --values order-service/values.yaml
+                                helm upgrade --install inventory-service inventory-service/ -n $NAMESPACE_BACKEND --values inventory-service/values.yaml
+                                helm upgrade --install notification-service notification-service/ -n $NAMESPACE_BACKEND --values notification-service/values.yaml
+                                helm upgrade --install api-gateway api-gateway/ -n $NAMESPACE_BACKEND --values api-gateway/values.yaml
+                                helm upgrade --install frontend frontend/ -n $NAMESPACE_FRONTEND --values frontend/values.yaml
                                 
                                 cd ../..
                                 
