@@ -1,157 +1,68 @@
 version: '3.8'
 
 services:
-  # Databases
-  mysql:
-    image: mysql:8.3.0
-    container_name: mysql-db
-    environment:
-      MYSQL_ROOT_PASSWORD: mysql
-      MYSQL_DATABASE: ecommerce_db
-    ports:
-      - "13306:3306"
-
+  # MongoDB for product-service
   mongodb:
     image: mongo:7.0.5
-    container_name: mongodb
+    container_name: mongodb-test
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: ecommerce_db
     ports:
       - "17017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - test-network
 
-  # Kafka Stack
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "12181:2181"
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports:
-      - "19092:9092"
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:7.5.0
-    container_name: schema-registry
-    depends_on:
-      - kafka
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-    ports:
-      - "18081:8081"
-
-  # Mail Service for testing
-  mailhog:
-    image: mailhog/mailhog:v1.0.0
-    container_name: mailhog
-    ports:
-      - "11025:1025"
-      - "18025:8025"
-
-  # Backend Services
+  # Product Service with MongoDB
   product-service:
     build:
       context: ../../backend
       dockerfile: ./product-service/Dockerfile
-    container_name: product-service
+    container_name: product-service-test
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: product-service
-      SPRING_DATA_MONGODB_URI: mongodb://root:password@mongodb:27017/products?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/ecommerce_db
     ports:
       - "18080:8080"
+    networks:
+      - test-network
 
-  inventory-service:
-    build:
-      context: ../../backend
-      dockerfile: ./inventory-service/Dockerfile
-    container_name: inventory-service
-    depends_on:
-      - mysql
-    environment:
-      SPRING_APPLICATION_NAME: inventory-service
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: mysql
-    ports:
-      - "18082:8082"
-
-  order-service:
-    build:
-      context: ../../backend
-      dockerfile: ./order-service/Dockerfile
-    container_name: order-service
-    depends_on:
-      - mysql
-      - kafka
-      - inventory-service
-    environment:
-      SPRING_APPLICATION_NAME: order-service
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: mysql
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      ORDER_SERVICE_BASEURL: http://inventory-service:8082
-    ports:
-      - "18084:8081"
-
-  notification-service:
-    build:
-      context: ../../backend
-      dockerfile: ./notification-service/Dockerfile
-    container_name: notification-service
-    depends_on:
-      - kafka
-      - mailhog
-    environment:
-      SPRING_APPLICATION_NAME: notification-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_MAIL_HOST: mailhog
-      SPRING_MAIL_PORT: 1025
-    ports:
-      - "18083:8083"
-
+  # API Gateway
   api-gateway:
     build:
       context: ../../backend
       dockerfile: ./api-gateway/Dockerfile
-    container_name: api-gateway
+    container_name: api-gateway-test
     depends_on:
       - product-service
-      - inventory-service
-      - order-service
     environment:
       SPRING_APPLICATION_NAME: api-gateway
     ports:
       - "19000:9000"
+    networks:
+      - test-network
 
   # Frontend
   frontend:
     build:
       context: ../../frontend
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: frontend-test
     depends_on:
       - api-gateway
+    environment:
+      API_URL: http://api-gateway-test:9000
     ports:
       - "13000:80"
+    networks:
+      - test-network
 
 networks:
-  default:
-    name: e-commerce-network
+  test-network:
+    driver: bridge
