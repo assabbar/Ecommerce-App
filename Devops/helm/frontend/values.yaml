@@ -1,8 +1,10 @@
-replicaCount: 3
+replicaCount: 1
 image:
-  repository: acrecomdev12161808.azurecr.io/frontend
+  repository: acrecomdev12191331.azurecr.io/frontend
   pullPolicy: IfNotPresent
   tag: "latest"
+imagePullSecrets:
+  - name: acr-credentials
 serviceAccount:
   name: "frontend-sa"
 service:
@@ -31,6 +33,6 @@ env:
     value: "http://api-gateway.backend.svc.cluster.local:8080"
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 10
+  minReplicas: 1
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 80

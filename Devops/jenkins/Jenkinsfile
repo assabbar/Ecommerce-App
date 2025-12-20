@@ -90,6 +90,15 @@ pipeline {
                                 echo "✅ kubectl configured for AKS"
                                 
                                 echo ""
+                                echo "Installing Helm..."
+                                if ! command -v helm &> /dev/null; then
+                                    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+                                    echo "✅ Helm installed successfully"
+                                else
+                                    echo "✅ Helm already installed: $(helm version --short)"
+                                fi
+                                
+                                echo ""
                                 echo "✅ Azure setup completed successfully"
                             '''
                         }
