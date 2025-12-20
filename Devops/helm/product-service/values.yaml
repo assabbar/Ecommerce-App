@@ -50,7 +50,10 @@ env:
   - name: SPRING_PROFILES_ACTIVE
     value: "prod"
   - name: MONGODB_URI
-    value: "mongodb://cosmosecomdb:27017/ecom-mongo-db"
+    valueFrom:
+      secretKeyRef:
+        name: cosmosdb-credentials
+        key: uri
   - name: SERVER_PORT
     value: "8080"
 
