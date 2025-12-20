@@ -45,7 +45,13 @@ pipeline {
                         JENKINS_ENV_FILE="/var/jenkins_home/jenkins.env"
                         if [ -f "$JENKINS_ENV_FILE" ]; then
                             echo "Loading Azure configuration from jenkins.env..."
-                            . $JENKINS_ENV_FILE
+                            
+                            # Remove BOM if present and load variables
+                            sed '1s/^\xEF\xBB\xBF//' "$JENKINS_ENV_FILE" > /tmp/jenkins.env.clean
+                            # Use set -a to export all variables
+                            set -a
+                            . /tmp/jenkins.env.clean
+                            set +a
                             
                             echo ""
                             echo "✅ Azure Configuration Loaded:"
