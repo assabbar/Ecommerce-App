@@ -142,10 +142,12 @@ MYSQL_HOST=$(az mysql flexible-server show --resource-group "$RESOURCE_GROUP" --
 MYSQL_USERNAME="${MYSQL_USERNAME:-adminuser}"
 MYSQL_PASSWORD=$(az mysql flexible-server parameter show --resource-group "$RESOURCE_GROUP" --server-name "$MYSQL_SERVER_NAME" --name "require_secure_transport" 2>/dev/null | jq -r '.value' || echo "ChangeMe@123")
 
-# Build MySQL JDBC URL
-MYSQL_JDBC_URL="jdbc:mysql://${MYSQL_HOST}:3306/ecom_order_db?allowPublicKeyRetrieval=true&useSSL=false"
+# Build MySQL JDBC URL - Single shared database: ecom_app
+# Both Order Service (t_orders table) and Inventory Service (t_inventory table) use this database
+MYSQL_JDBC_URL="jdbc:mysql://${MYSQL_HOST}:3306/ecom_app?allowPublicKeyRetrieval=true&useSSL=false"
 
 # Create MySQL secret in backend namespace
+# This single secret is used by both Order Service and Inventory Service
 kubectl create secret generic mysql-credentials \
     --from-literal=host="$MYSQL_HOST" \
     --from-literal=username="$MYSQL_USERNAME" \
@@ -154,7 +156,7 @@ kubectl create secret generic mysql-credentials \
     --namespace="$BACKEND_NAMESPACE" \
     --dry-run=client -o yaml | kubectl apply -f -
 
-echo -e "${GREEN}✅ MySQL secret created${NC}"
+echo -e "${GREEN}✅ MySQL secret created (shared database: ecom_app)${NC}"
 
 # Create secrets in monitoring namespace (for log shipping)
 kubectl create secret generic cosmosdb-credentials \
