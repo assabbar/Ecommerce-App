@@ -50,9 +50,9 @@ pipeline {
                             echo ""
                             echo "✅ Azure Configuration Loaded:"
                             echo "   ACR: $ACR_LOGIN_SERVER"
-                            echo "   AKS Cluster: $AZURE_AKS_NAME"
-                            echo "   MySQL: $AZURE_MYSQL_HOST"
-                            echo "   CosmosDB: $AZURE_COSMOSDB_HOST"
+                            echo "   AKS Cluster: $AKS_CLUSTER_NAME"
+                            echo "   MySQL: $MYSQL_HOST"
+                            echo "   CosmosDB: $COSMOSDB_ACCOUNT"
                             echo "   Resource Group: $AZURE_RESOURCE_GROUP"
                             echo "   Kubernetes Namespaces: backend, frontend, monitoring"
                             
