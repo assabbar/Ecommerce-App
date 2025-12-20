@@ -1,0 +1,167 @@
+################################################################################
+# Grafana Configuration for E-Commerce Monitoring
+# Visualizes metrics from Prometheus and logs from Loki
+################################################################################
+
+# Grafana admin credentials
+adminUser: admin
+adminPassword: "admin"  # Change this in production!
+
+# Persistence
+persistence:
+  enabled: true
+  storageClassName: default
+  size: 10Gi
+
+# Service
+service:
+  type: LoadBalancer
+  port: 3000
+  targetPort: 3000
+
+# Datasources
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      # Prometheus datasource
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-operated:9090
+        access: proxy
+        isDefault: true
+        editable: true
+        
+      # Loki datasource
+      - name: Loki
+        type: loki
+        url: http://loki:3100
+        access: proxy
+        isDefault: false
+        editable: true
+
+# Dashboards to install
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'kubernetes'
+        orgId: 1
+        folder: 'Kubernetes'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+          
+      - name: 'applications'
+        orgId: 1
+        folder: 'Applications'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/applications
+
+dashboards:
+  kubernetes:
+    k8s-cluster:
+      gnetId: 7249
+      revision: 1
+      datasource: Prometheus
+      
+    k8s-node:
+      gnetId: 8588
+      revision: 1
+      datasource: Prometheus
+      
+    k8s-pods:
+      gnetId: 6417
+      revision: 1
+      datasource: Prometheus
+      
+  applications:
+    spring-boot:
+      gnetId: 4701
+      revision: 5
+      datasource: Prometheus
+      
+    jvm:
+      gnetId: 11074
+      revision: 2
+      datasource: Prometheus
+
+# Grafana plugins
+plugins:
+  - grafana-piechart-panel
+  - grafana-worldmap-panel
+  - grafana-clock-panel
+  - grafana-simple-json-datasource
+
+# Environment variables
+env:
+  GF_SECURITY_ADMIN_PASSWORD: "admin"
+  GF_SECURITY_ALLOW_EMBED_INITIATE_LOGIN: "true"
+  GF_AUTH_ANONYMOUS_ENABLED: "false"
+  GF_INSTALL_PLUGINS: "grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel"
+
+# SMTP configuration (optional)
+# smtp:
+#   enabled: true
+#   host: smtp.gmail.com
+#   port: 465
+#   user: your-email@gmail.com
+#   password: your-password
+#   fromAddress: grafana@yourdomain.com
+#   fromName: E-Commerce Monitoring
+
+# Service account
+serviceAccount:
+  create: true
+  name: grafana
+
+# RBAC
+rbac:
+  pspEnabled: false
+
+# Resource limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Liveness and readiness probes
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+# Node selector (optional)
+# nodeSelector:
+#   monitoring: "true"
+
+# Affinity rules (optional)
+# affinity:
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#       - weight: 100
+#         podAffinityTerm:
+#           labelSelector:
+#             matchExpressions:
+#               - key: app
+#                 operator: In
+#                 values:
+#                   - grafana
+#           topologyKey: kubernetes.io/hostname

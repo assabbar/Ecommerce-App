@@ -1,0 +1,107 @@
+################################################################################
+# Loki Stack Configuration for Kubernetes
+# Centralized log aggregation with Loki, Promtail, and Grafana
+################################################################################
+
+# Loki configuration
+loki:
+  # Loki server configuration
+  config:
+    auth_enabled: false
+    
+    ingester:
+      chunk_idle_period: 3m
+      chunk_retain_period: 1m
+      max_chunk_age: 1h
+      chunk_encoding: snappy
+      
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      ingestion_rate_mb: 20
+      ingestion_burst_size_mb: 30
+      
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+            
+    server:
+      http_listen_port: 3100
+      
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /loki/boltdb-shipper-active
+        cache_location: /loki/boltdb-shipper-cache
+        shared_store: filesystem
+      filesystem:
+        directory: /loki/chunks
+        
+    table_manager:
+      retention_deletes_enabled: true
+      retention_period: 168h  # 7 days
+      
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: default
+  
+serviceAccount:
+  create: true
+  name: loki
+  
+rbac:
+  create: true
+
+# Promtail configuration (log shipper)
+promtail:
+  enabled: true
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Extract namespace
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          # Extract pod name
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          # Extract container name
+          - source_labels: [__meta_kubernetes_container_name]
+            action: replace
+            target_label: container
+          # Extract pod labels
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          # Add service label
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: replace
+            target_label: app
+            
+  serviceAccount:
+    create: true
+    name: promtail
+
+# Grafana datasource configuration
+grafana:
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          type: loki
+          url: http://loki:3100
+          access: proxy
+          isDefault: false

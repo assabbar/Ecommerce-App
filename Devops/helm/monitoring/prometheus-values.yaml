@@ -1,0 +1,171 @@
+################################################################################
+# Prometheus Stack Configuration for Kubernetes
+# Includes Prometheus, Alert Manager, and Node Exporter
+################################################################################
+
+# Prometheus configuration
+prometheus:
+  prometheusSpec:
+    # Retention
+    retention: 30d
+    
+    # Resource limits
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: 1000m
+        memory: 4Gi
+    
+    # Service Monitor selectors
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    
+    # Pod Monitor selectors
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorNamespaceSelector: {}
+    
+    # Alert rules
+    ruleSelectorNilUsesHelmValues: false
+    ruleNamespaceSelector: {}
+    
+    # Storage
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+# Prometheus Operator
+prometheus-operator:
+  enabled: true
+
+# Alert Manager
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Node Exporter
+nodeExporter:
+  enabled: true
+
+# Kube State Metrics
+kubeStateMetrics:
+  enabled: true
+
+# Prometheus Node Exporter service monitor
+prometheus-node-exporter:
+  hostNetwork: true
+
+# Grafana datasource for Prometheus
+grafana:
+  enabled: true
+  adminPassword: "admin"
+  persistence:
+    enabled: true
+    size: 10Gi
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-operated:9090
+          access: proxy
+          isDefault: true
+
+# Service Monitors for scraping
+serviceMonitor:
+  # Enable service monitors for Kubernetes API server
+  apiServer:
+    enabled: true
+    
+  # Enable service monitors for kubelets
+  kubelet:
+    enabled: true
+    
+  # Enable service monitors for kube-controller-manager
+  kubeControllerManager:
+    enabled: true
+    
+  # Enable service monitors for kube-scheduler
+  kubeScheduler:
+    enabled: true
+    
+  # Enable service monitors for kube-proxy
+  kubeProxy:
+    enabled: true
+    
+  # Enable service monitors for etcd
+  kubeEtcd:
+    enabled: false  # Only if etcd is externally accessible
+
+# Alert Rules
+prometheusRules:
+  groups:
+    - name: kubernetes.rules
+      interval: 30s
+      rules:
+        # High memory usage
+        - alert: PodMemoryUsageHigh
+          expr: |
+            (sum(container_memory_working_set_bytes) BY (pod, namespace) / sum(container_spec_memory_limit_bytes) BY (pod, namespace)) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} high memory usage"
+            
+        # High CPU usage
+        - alert: PodCPUUsageHigh
+          expr: |
+            (sum(rate(container_cpu_usage_seconds_total[5m])) BY (pod, namespace) / sum(container_spec_cpu_quota/container_spec_cpu_period) BY (pod, namespace)) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} high CPU usage"
+            
+        # Node memory pressure
+        - alert: NodeMemoryPressure
+          expr: kube_node_status_condition{condition="MemoryPressure",status="true"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} has memory pressure"
+            
+        # Node disk pressure
+        - alert: NodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure",status="true"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} has disk pressure"
+            
+        # Pod not healthy
+        - alert: PodNotHealthy
+          expr: min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[15m:1m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not healthy"
