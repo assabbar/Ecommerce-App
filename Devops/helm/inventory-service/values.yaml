@@ -30,17 +30,17 @@ readinessProbe:
   initialDelaySeconds: 30
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "prod"
+    value: "production"
   - name: SERVER_PORT
     value: "8082"
-  - name: SPRING_DATASOURCE_URL
-    value: "jdbc:mysql://mysql-ecom.mysql.database.azure.com:3306/ecomdb"
-  - name: SPRING_DATASOURCE_USERNAME
+  - name: MYSQL_JDBC_URL
+    value: "jdbc:mysql://mysql-ecom.mysql.database.azure.com:3306/ecom_app?allowPublicKeyRetrieval=true&useSSL=false"
+  - name: MYSQL_USERNAME
     valueFrom:
       secretKeyRef:
         name: mysql-credentials
         key: mysql-user
-  - name: SPRING_DATASOURCE_PASSWORD
+  - name: MYSQL_PASSWORD
     valueFrom:
       secretKeyRef:
         name: mysql-credentials

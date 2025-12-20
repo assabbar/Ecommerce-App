@@ -48,8 +48,8 @@ readinessProbe:
 
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "prod"
-  - name: MONGODB_URI
+    value: "production"
+  - name: COSMOSDB_URI
     valueFrom:
       secretKeyRef:
         name: cosmosdb-credentials
