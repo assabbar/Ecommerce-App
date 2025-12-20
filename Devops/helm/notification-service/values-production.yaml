@@ -1,0 +1,120 @@
+# Helm values for Notification Service (Production)
+
+replicaCount: 2
+
+image:
+  repository: acrecomdev12191331.azurecr.io/notification-service
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: acr-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8083"
+  prometheus.io/path: "/api/actuator/prometheus"
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8083
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ==========================================
+# Application Configuration
+# ==========================================
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "production"
+  
+  # Kafka / Event Hub Configuration
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    value: "${EVENTHUB_NAMESPACE}.servicebus.windows.net:9092"
+  
+  - name: KAFKA_SECURITY_PROTOCOL
+    value: "SASL_SSL"
+  
+  - name: KAFKA_SASL_MECHANISM
+    value: "PLAIN"
+  
+  # Email Configuration (for notifications)
+  - name: MAIL_HOST
+    value: "smtp.sendgrid.net"
+  
+  - name: MAIL_PORT
+    value: "587"
+  
+  - name: MAIL_USERNAME
+    value: "apikey"
+  
+  - name: MAIL_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: notification-credentials
+        key: sendgrid-api-key
+  
+  # Monitoring
+  - name: LOKI_URL
+    value: "http://loki:3100/loki/api/v1/push"
+
+livenessProbe:
+  httpGet:
+    path: /api/actuator/health/liveness
+    port: 8083
+  initialDelaySeconds: 40
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/actuator/health/readiness
+    port: 8083
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+# Ensure pod runs on backend namespace
+namespaceOverride: backend

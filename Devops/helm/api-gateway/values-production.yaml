@@ -1,0 +1,109 @@
+# Helm values for API Gateway (Production)
+
+replicaCount: 2
+
+image:
+  repository: acrecomdev12191331.azurecr.io/api-gateway
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: acr-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9000"
+  prometheus.io/path: "/actuator/prometheus"
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 9000
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ==========================================
+# Application Configuration
+# ==========================================
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "production"
+  
+  # Service URLs (Kubernetes DNS)
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+    value: "http://product-service:8080"
+  
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+    value: "http://order-service:8081"
+  
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+    value: "http://inventory-service:8082"
+  
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
+    value: "http://notification-service:8083"
+  
+  # Monitoring
+  - name: LOKI_URL
+    value: "http://loki:3100/loki/api/v1/push"
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 9000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 9000
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+# Ensure pod runs on backend namespace
+namespaceOverride: backend

@@ -1,0 +1,132 @@
+# Helm values for Product Service (Production - CosmosDB)
+
+replicaCount: 2
+
+image:
+  repository: acrecomdev12191331.azurecr.io/product-service
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: acr-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/api/actuator/prometheus"
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8080
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ==========================================
+# Application Configuration
+# ==========================================
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "production"
+  
+  # CosmosDB MongoDB Configuration
+  - name: COSMOSDB_HOST
+    valueFrom:
+      secretKeyRef:
+        name: cosmosdb-credentials
+        key: host
+  
+  - name: COSMOSDB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: cosmosdb-credentials
+        key: username
+  
+  - name: COSMOSDB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: cosmosdb-credentials
+        key: password
+  
+  - name: COSMOSDB_URI
+    valueFrom:
+      secretKeyRef:
+        name: cosmosdb-credentials
+        key: uri
+  
+  - name: COSMOSDB_DATABASE
+    value: "ecom-mongo-db"
+  
+  # Monitoring
+  - name: LOKI_URL
+    value: "http://loki:3100/loki/api/v1/push"
+
+volumeMounts:
+  - name: uploads
+    mountPath: /app/uploads
+
+volumes:
+  - name: uploads
+    emptyDir: {}
+
+livenessProbe:
+  httpGet:
+    path: /api/actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+# Ensure pod runs on backend namespace
+namespaceOverride: backend

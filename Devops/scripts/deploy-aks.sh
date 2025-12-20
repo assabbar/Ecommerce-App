@@ -111,6 +111,62 @@ echo -e "${GREEN}✅ Docker registry secrets created${NC}"
 echo ""
 
 ################################################################################
+# 3.5 Create Database Credentials Secrets
+################################################################################
+echo -e "${YELLOW}3️⃣.5️⃣  Creating Database Credentials Secrets...${NC}"
+
+# Get CosmosDB credentials
+echo -e "${BLUE}Retrieving CosmosDB credentials...${NC}"
+COSMOSDB_HOST=$(az cosmosdb show --resource-group "$RESOURCE_GROUP" --name "$COSMOSDB_ACCOUNT_NAME" --query "documentEndpoint" -o tsv | sed 's|https://||' | sed 's|/||')
+COSMOSDB_USERNAME=$(az cosmosdb keys list --resource-group "$RESOURCE_GROUP" --name "$COSMOSDB_ACCOUNT_NAME" --type connection-strings --query "connectionStrings[0].connectionString" -o tsv | grep -oP '(?<=username=)[^&]*' || echo "cosmosecomdb")
+COSMOSDB_KEY=$(az cosmosdb keys list --resource-group "$RESOURCE_GROUP" --name "$COSMOSDB_ACCOUNT_NAME" --type keys --query "primaryMasterKey" -o tsv)
+
+# Build CosmosDB connection URI
+COSMOSDB_URI="mongodb+srv://${COSMOSDB_USERNAME}:${COSMOSDB_KEY}@${COSMOSDB_HOST}:10255/ecom-mongo-db?ssl=true&replicaSet=globaldb&maxIdleTimeMS=120000"
+
+# Create CosmosDB secret in backend namespace
+kubectl create secret generic cosmosdb-credentials \
+    --from-literal=host="$COSMOSDB_HOST" \
+    --from-literal=username="$COSMOSDB_USERNAME" \
+    --from-literal=password="$COSMOSDB_KEY" \
+    --from-literal=uri="$COSMOSDB_URI" \
+    --from-literal=database="ecom-mongo-db" \
+    --namespace="$BACKEND_NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+echo -e "${GREEN}✅ CosmosDB secret created${NC}"
+
+# Get MySQL credentials
+echo -e "${BLUE}Retrieving MySQL credentials...${NC}"
+MYSQL_HOST=$(az mysql flexible-server show --resource-group "$RESOURCE_GROUP" --name "$MYSQL_SERVER_NAME" --query "fullyQualifiedDomainName" -o tsv)
+MYSQL_USERNAME="${MYSQL_USERNAME:-adminuser}"
+MYSQL_PASSWORD=$(az mysql flexible-server parameter show --resource-group "$RESOURCE_GROUP" --server-name "$MYSQL_SERVER_NAME" --name "require_secure_transport" 2>/dev/null | jq -r '.value' || echo "ChangeMe@123")
+
+# Build MySQL JDBC URL
+MYSQL_JDBC_URL="jdbc:mysql://${MYSQL_HOST}:3306/ecom_order_db?allowPublicKeyRetrieval=true&useSSL=false"
+
+# Create MySQL secret in backend namespace
+kubectl create secret generic mysql-credentials \
+    --from-literal=host="$MYSQL_HOST" \
+    --from-literal=username="$MYSQL_USERNAME" \
+    --from-literal=password="$MYSQL_PASSWORD" \
+    --from-literal=jdbc-url="$MYSQL_JDBC_URL" \
+    --namespace="$BACKEND_NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+echo -e "${GREEN}✅ MySQL secret created${NC}"
+
+# Create secrets in monitoring namespace (for log shipping)
+kubectl create secret generic cosmosdb-credentials \
+    --from-literal=host="$COSMOSDB_HOST" \
+    --from-literal=username="$COSMOSDB_USERNAME" \
+    --from-literal=password="$COSMOSDB_KEY" \
+    --namespace="$MONITORING_NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null || true
+
+echo ""
+
+################################################################################
 # 4. Deploy Monitoring Stack (Prometheus, Grafana, Loki)
 ################################################################################
 echo -e "${YELLOW}4️⃣  Deploying Monitoring Stack...${NC}"
