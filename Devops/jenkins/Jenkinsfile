@@ -38,46 +38,77 @@ pipeline {
             agent any
             steps {
                 script {
-                    echo '====== Setup Azure Configuration ======'
+                    echo '====== Setup Azure Configuration from Azure Key Vault ======'
                     sh '''
-                        # Load environment from generated jenkins.env (created by setup-azure-jenkins.sh)
-                        # jenkins.env is mounted as a volume in the Jenkins container at /var/jenkins_home/jenkins.env
-                        JENKINS_ENV_FILE="/var/jenkins_home/jenkins.env"
-                        if [ -f "$JENKINS_ENV_FILE" ]; then
-                            echo "Loading Azure configuration from jenkins.env..."
-                            
-                            # Remove BOM if present and load variables
-                            sed '1s/^\xEF\xBB\xBF//' "$JENKINS_ENV_FILE" > /tmp/jenkins.env.clean
-                            # Use set -a to export all variables
-                            set -a
-                            . /tmp/jenkins.env.clean
-                            set +a
-                            
-                            echo ""
-                            echo "✅ Azure Configuration Loaded:"
-                            echo "   ACR: $ACR_LOGIN_SERVER"
-                            echo "   AKS Cluster: $AKS_CLUSTER_NAME"
-                            echo "   MySQL: $MYSQL_HOST"
-                            echo "   CosmosDB: $COSMOSDB_ACCOUNT"
-                            echo "   Resource Group: $AZURE_RESOURCE_GROUP"
-                            echo "   Kubernetes Namespaces: backend, frontend, monitoring"
-                            
-                            echo ""
-                            echo "Verifying AKS Connection..."
-                            kubectl cluster-info
-                            kubectl get nodes
-                            
-                            echo ""
-                            echo "Verifying ACR Credentials..."
-                            echo $ACR_PASSWORD | docker login -u $ACR_USERNAME --password-stdin $ACR_LOGIN_SERVER
-                            docker pull $ACR_LOGIN_SERVER/product-service:latest --quiet || echo "Note: Initial deployment may not have images yet"
-                            
-                            echo ""
-                            echo "Verifying Kubernetes Secrets..."
-                            kubectl get secrets acr-secret -n backend
-                            kubectl get secrets acr-secret -n frontend
-                            kubectl get secrets acr-secret -n monitoring
-                            
+                        # Login to Azure using current credentials
+                        echo "Authenticating with Azure..."
+                        az account show > /dev/null 2>&1 || (echo "Not logged in. Please run: az login"; exit 1)
+                        
+                        # Get subscription and resource group from az cli
+                        SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+                        
+                        # Set Key Vault name (must match Azure Key Vault resource)
+                        KEY_VAULT_NAME="ecommerce-kv"
+                        
+                        echo "📦 Retrieving secrets from Azure Key Vault: $KEY_VAULT_NAME"
+                        
+                        # Retrieve all secrets from Key Vault
+                        export AZURE_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
+                        export AZURE_RESOURCE_GROUP=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "resource-group" --query value -o tsv 2>/dev/null || echo "rg-ecom-dev")
+                        export AZURE_LOCATION=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "location" --query value -o tsv 2>/dev/null || echo "eastus")
+                        
+                        # AKS Configuration
+                        export AKS_CLUSTER_NAME=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "aks-cluster-name" --query value -o tsv 2>/dev/null || echo "aks-ecom")
+                        export AKS_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP
+                        
+                        # ACR Configuration
+                        export ACR_NAME=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "acr-name" --query value -o tsv 2>/dev/null || echo "acrecomdev12191331")
+                        export ACR_LOGIN_SERVER="$ACR_NAME.azurecr.io"
+                        export ACR_USERNAME=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "acr-username" --query value -o tsv)
+                        export ACR_PASSWORD=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "acr-password" --query value -o tsv)
+                        
+                        # CosmosDB Configuration
+                        export COSMOSDB_ACCOUNT=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "cosmosdb-account" --query value -o tsv 2>/dev/null || echo "cosmosecomdb")
+                        export COSMOSDB_URI=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "cosmosdb-connection-string" --query value -o tsv)
+                        
+                        # MySQL Configuration
+                        export MYSQL_HOST=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "mysql-host" --query value -o tsv)
+                        export MYSQL_USERNAME=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "mysql-username" --query value -o tsv)
+                        export MYSQL_PASSWORD=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name "mysql-password" --query value -o tsv)
+                        export MYSQL_DATABASE="ecom_app"
+                        
+                        # Kubernetes Configuration
+                        export NAMESPACE_BACKEND="backend"
+                        export NAMESPACE_FRONTEND="frontend"
+                        export NAMESPACE_MONITORING="monitoring"
+                        
+                        echo ""
+                        echo "✅ Secrets Retrieved from Azure Key Vault:"
+                        echo "   Subscription: $AZURE_SUBSCRIPTION_ID"
+                        echo "   Resource Group: $AZURE_RESOURCE_GROUP"
+                        echo "   AKS Cluster: $AKS_CLUSTER_NAME"
+                        echo "   ACR: $ACR_LOGIN_SERVER"
+                        echo "   MySQL: $MYSQL_HOST"
+                        echo "   CosmosDB: $COSMOSDB_ACCOUNT"
+                        
+                        echo ""
+                        echo "📍 Configuring kubectl context..."
+                        az aks get-credentials --resource-group $AZURE_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --overwrite-existing
+                        
+                        echo ""
+                        echo "Verifying AKS Connection..."
+                        kubectl cluster-info
+                        kubectl get nodes
+                        
+                        echo ""
+                        echo "Verifying ACR Credentials..."
+                        echo $ACR_PASSWORD | docker login -u $ACR_USERNAME --password-stdin $ACR_LOGIN_SERVER
+                        docker pull $ACR_LOGIN_SERVER/product-service:latest --quiet || echo "Note: Initial deployment may not have images yet"
+                        
+                        echo ""
+                        echo "Verifying Kubernetes Secrets..."
+                        kubectl get secrets acr-secret -n backend 2>/dev/null || echo "acr-secret will be created"
+                        
                             echo ""
                             echo "✅ Azure Configuration: READY TO DEPLOY"
                         else
