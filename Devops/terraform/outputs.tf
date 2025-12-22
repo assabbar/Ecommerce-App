@@ -22,14 +22,14 @@ output "eventhub_namespace_name" {
   value = azurerm_eventhub_namespace.eh_ns.name
 }
 
-output "backend_namespace" {
-  value = kubernetes_namespace.backend.metadata[0].name
-}
+# output "backend_namespace" {
+#   value = kubernetes_namespace.backend.metadata[0].name
+# }
 
-output "frontend_namespace" {
-  value = kubernetes_namespace.frontend.metadata[0].name
-}
+# output "frontend_namespace" {
+#   value = kubernetes_namespace.frontend.metadata[0].name
+# }
 
-output "monitoring_namespace" {
-  value = kubernetes_namespace.monitoring.metadata[0].name
-}
+# output "monitoring_namespace" {
+#   value = kubernetes_namespace.monitoring.metadata[0].name
+# }
