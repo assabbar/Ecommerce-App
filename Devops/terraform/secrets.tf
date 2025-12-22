@@ -31,7 +31,7 @@ resource "kubernetes_secret" "cosmosdb_credentials" {
   type = "Opaque"
 
   data = {
-    "uri" = "mongodb://${azurerm_cosmosdb_account.mongo.name}:${azurerm_cosmosdb_account.mongo.primary_readonly_key}@${azurerm_cosmosdb_account.mongo.name}.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retryWrites=false&maxIdleTimeMS=120000&appName=@${azurerm_cosmosdb_account.mongo.name}@"
+    "uri" = "mongodb://${azurerm_cosmosdb_account.mongo.name}:${azurerm_cosmosdb_account.mongo.primary_readonly_key}@${azurerm_cosmosdb_account.mongo.name}.mongo.cosmos.azure.com:10255/ecom-mongo-db?ssl=true&replicaSet=globaldb&retryWrites=false&maxIdleTimeMS=120000&appName=@${azurerm_cosmosdb_account.mongo.name}@"
   }
 
   depends_on = [kubernetes_namespace.backend, azurerm_cosmosdb_account.mongo]
