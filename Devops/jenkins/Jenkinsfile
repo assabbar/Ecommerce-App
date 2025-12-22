@@ -74,10 +74,10 @@ pipeline {
                                     --query "connectionStrings[0].connectionString" -o tsv)
                                 echo "✅ CosmosDB connection string retrieved"
                                 
-                                # Login to ACR with Docker
+                                # Login to ACR with Azure CLI (service principal auth)
                                 echo ""
-                                echo "Logging into ACR with Docker..."
-                                echo $ACR_PASSWORD | docker login -u $ACR_NAME --password-stdin $ACR_LOGIN_SERVER
+                                echo "Logging into ACR with Azure CLI..."
+                                az acr login --name $ACR_NAME
                                 echo "✅ Docker logged into ACR successfully"
                                 
                                 # Get AKS credentials
@@ -723,7 +723,7 @@ pipeline {
               ✓ Smoke Tests Passed
             
             Deployment Details:
-              • Container Registry: acrecomdev12191331.azurecr.io
+              • Container Registry: ${ACR_LOGIN_SERVER}
               • Cluster: Azure Kubernetes Service (AKS)
               • Build Number: ${BUILD_NUMBER}
               
