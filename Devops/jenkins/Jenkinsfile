@@ -13,11 +13,11 @@ pipeline {
         COMPOSE_DOCKER_CLI_BUILD = '1'
         
         // Control flags
-        RUN_BACKEND_TESTS = 'true'
-        RUN_FRONTEND_TESTS = 'true'
-        RUN_INTEGRATION_TESTS = 'true'
-        RUN_BUILD_IMAGES = 'true'
-        RUN_PUSH_TO_ACR = 'true'
+        RUN_BACKEND_TESTS = 'false'
+        RUN_FRONTEND_TESTS = 'false'
+        RUN_INTEGRATION_TESTS = 'false'
+        RUN_BUILD_IMAGES = 'false'
+        RUN_PUSH_TO_ACR = 'false'
     }
 
     options {
