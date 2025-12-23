@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: acrecomdev12231140.azurecr.io/frontend
+  repository: acrecomdev12231226.azurecr.io/frontend
   pullPolicy: IfNotPresent
   tag: "latest"
 imagePullSecrets:
