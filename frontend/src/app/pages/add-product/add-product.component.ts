@@ -140,7 +140,7 @@ export class AddProductComponent implements OnInit {
       };
 
       this.productService.createProduct(product).subscribe({
-        next: (product) => {
+        next: (product: Product) => {
           this.productCreated = true;
           this.isSubmitting = false;
           this.addProductForm.reset();
@@ -153,7 +153,7 @@ export class AddProductComponent implements OnInit {
             window.location.href = '/admin'; // Redirect to admin dashboard
           }, 2000);
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error creating product:', error);
           this.isSubmitting = false;
           alert('Error creating product: ' + (error.message || 'Unknown error'));

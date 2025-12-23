@@ -15,7 +15,7 @@ export class ProductService {
     return this.httpClient.get<Array<Product>>('/api/product');
   }
 
-  getProductById(id: number): Observable<Product> {
+  getProductById(id: string): Observable<Product> {
     return this.httpClient.get<Product>(`/api/product/${id}`);
   }
 
@@ -23,7 +23,11 @@ export class ProductService {
     return this.httpClient.post<Product>('/api/product', product);
   }
 
-  updateProduct(id: number, product: Product): Observable<Product> {
+  createProduct(product: Product): Observable<Product> {
+    return this.addProduct(product);
+  }
+
+  updateProduct(id: string, product: Product): Observable<Product> {
     return this.httpClient.put<Product>(`/api/product/${id}`, product);
   }
 
