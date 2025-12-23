@@ -13,10 +13,10 @@ service:
   targetPort: 80
 resources:
   limits:
-    cpu: 400m
+    cpu: 460m
     memory: 512Mi
   requests:
-    cpu: 200m
+    cpu: 230m
     memory: 256Mi
 livenessProbe:
   httpGet:
