@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: acrecomdev12231226.azurecr.io/order-service
+  repository: acrecomdev12231416.azurecr.io/order-service
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -19,11 +19,11 @@ service:
 
 resources:
   limits:
-    cpu: 250m
-    memory: 512Mi
-  requests:
-    cpu: 100m
+    cpu: 150m
     memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
 
 livenessProbe:
   httpGet:

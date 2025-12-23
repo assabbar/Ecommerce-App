@@ -14,7 +14,7 @@ resource "kubernetes_secret" "mysql_credentials" {
 
   data = {
     "mysql-password" = var.mysql_password
-    "mysql-user"     = "root"
+    "mysql-user"     = "adminuser"
     "mysql-host"     = azurerm_mysql_flexible_server.mysql.fqdn
   }
 

@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: acrecomdev12231226.azurecr.io/product-service
+  repository: acrecomdev12231416.azurecr.io/product-service
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -22,11 +22,11 @@ ingress:
 
 resources:
   limits:
-    cpu: 250m
-    memory: 512Mi
-  requests:
-    cpu: 100m
+    cpu: 150m
     memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
 
 livenessProbe:
   httpGet:
