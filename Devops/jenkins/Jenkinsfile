@@ -565,7 +565,8 @@ pipeline {
                                 helm upgrade --install product-service product-service/ -n $NAMESPACE_BACKEND --values product-service/values.yaml
                                 helm upgrade --install order-service order-service/ -n $NAMESPACE_BACKEND --values order-service/values.yaml
                                 helm upgrade --install inventory-service inventory-service/ -n $NAMESPACE_BACKEND --values inventory-service/values.yaml
-                                helm upgrade --install notification-service notification-service/ -n $NAMESPACE_BACKEND --values notification-service/values.yaml
+                                # notification-service: build only, not deployed
+                                # helm upgrade --install notification-service notification-service/ -n $NAMESPACE_BACKEND --values notification-service/values.yaml
                                 helm upgrade --install api-gateway api-gateway/ -n $NAMESPACE_BACKEND --values api-gateway/values.yaml
                                 helm upgrade --install frontend frontend/ -n $NAMESPACE_FRONTEND --values frontend/values.yaml
                                 
