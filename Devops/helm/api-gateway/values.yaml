@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: acrecomdev12221755.azurecr.io/api-gateway
+  repository: acrecomdev12231140.azurecr.io/api-gateway
   pullPolicy: IfNotPresent
   tag: "latest"
 imagePullSecrets:

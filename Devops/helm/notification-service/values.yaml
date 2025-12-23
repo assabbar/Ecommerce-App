@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: acrecomdev12221755.azurecr.io/notification-service
+  repository: acrecomdev12231140.azurecr.io/notification-service
   pullPolicy: IfNotPresent
   tag: "latest"
 imagePullSecrets:
