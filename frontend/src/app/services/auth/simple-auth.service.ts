@@ -15,7 +15,7 @@ export interface User {
   providedIn: 'root'
 })
 export class SimpleAuthService {
-  private apiUrl = 'http://localhost:9000/api/auth';
+  private apiUrl = '/api/auth';
   private userSubject = new BehaviorSubject<User | null>(this.loadUserFromStorage());
   public user$ = this.userSubject.asObservable();
   

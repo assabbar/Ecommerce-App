@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class ApiUrlPipe implements PipeTransform {
-  private apiBaseUrl = 'http://localhost:9000';
+  private apiBaseUrl = '';
 
   transform(value: string | null | undefined): string {
     if (!value) {

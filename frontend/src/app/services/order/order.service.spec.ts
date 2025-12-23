@@ -41,7 +41,7 @@ describe('OrderService', () => {
       expect(response).toEqual('Order Placed Successfully');
     });
 
-    const req = httpMock.expectOne('http://localhost:9000/api/order');
+    const req = httpMock.expectOne('/api/order');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(mockOrder);
     req.flush('Order Placed Successfully');

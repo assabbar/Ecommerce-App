@@ -31,7 +31,7 @@ describe('ProductService', () => {
       expect(products).toEqual(mockProducts);
     });
 
-    const req = httpMock.expectOne('http://localhost:9000/api/product');
+    const req = httpMock.expectOne('/api/product');
     expect(req.request.method).toBe('GET');
     req.flush(mockProducts);
   });
@@ -43,7 +43,7 @@ describe('ProductService', () => {
       expect(product).toEqual(mockProduct);
     });
 
-    const req = httpMock.expectOne('http://localhost:9000/api/product/1');
+    const req = httpMock.expectOne('/api/product/1');
     expect(req.request.method).toBe('GET');
     req.flush(mockProduct);
   });
@@ -56,7 +56,7 @@ describe('ProductService', () => {
       expect(product).toEqual(mockResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:9000/api/product');
+    const req = httpMock.expectOne('/api/product');
     expect(req.request.method).toBe('POST');
     req.flush(mockResponse);
   });
@@ -69,7 +69,7 @@ describe('ProductService', () => {
       expect(product).toEqual(mockResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:9000/api/product/1');
+    const req = httpMock.expectOne('/api/product/1');
     expect(req.request.method).toBe('PUT');
     req.flush(mockResponse);
   });
@@ -77,7 +77,7 @@ describe('ProductService', () => {
   it('should delete product', () => {
     service.deleteProduct('1').subscribe();
 
-    const req = httpMock.expectOne('http://localhost:9000/api/product/1');
+    const req = httpMock.expectOne('/api/product/1');
     expect(req.request.method).toBe('DELETE');
     req.flush({});
   });

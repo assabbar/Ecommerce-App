@@ -12,23 +12,23 @@ export class ProductService {
   }
 
   getProducts(): Observable<Array<Product>> {
-    return this.httpClient.get<Array<Product>>('http://localhost:9000/api/product');
+    return this.httpClient.get<Array<Product>>('/api/product');
   }
 
-  getProductById(id: string): Observable<Product> {
-    return this.httpClient.get<Product>(`http://localhost:9000/api/product/${id}`);
+  getProductById(id: number): Observable<Product> {
+    return this.httpClient.get<Product>(`/api/product/${id}`);
   }
 
-  createProduct(product: Product): Observable<Product> {
-    return this.httpClient.post<Product>('http://localhost:9000/api/product', product);
+  addProduct(product: Product): Observable<Product> {
+    return this.httpClient.post<Product>('/api/product', product);
   }
 
-  updateProduct(id: string, product: Product): Observable<Product> {
-    return this.httpClient.put<Product>(`http://localhost:9000/api/product/${id}`, product);
+  updateProduct(id: number, product: Product): Observable<Product> {
+    return this.httpClient.put<Product>(`/api/product/${id}`, product);
   }
 
-  createProductWithImages(formData: FormData): Observable<Product> {
-    return this.httpClient.post<Product>('http://localhost:9000/api/product/with-images', formData);
+  addProductWithImages(formData: FormData): Observable<Product> {
+    return this.httpClient.post<Product>('/api/product/with-images', formData);
   }
 
   getAllProducts(): Observable<Array<Product>> {
@@ -36,6 +36,6 @@ export class ProductService {
   }
 
   deleteProduct(id: string): Observable<void> {
-    return this.httpClient.delete<void>(`http://localhost:9000/api/product/${id}`);
+    return this.httpClient.delete<void>(`/api/product/${id}`);
   }
 }
