@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: acrecomdev12231416.azurecr.io/notification-service
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: "latest"
 imagePullSecrets:
   - name: acr-credentials

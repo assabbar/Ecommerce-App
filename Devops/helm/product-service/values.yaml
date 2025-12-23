@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: acrecomdev12231416.azurecr.io/product-service
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: "latest"
 
 imagePullSecrets:
