@@ -56,6 +56,11 @@ env:
         key: uri
   - name: SERVER_PORT
     value: "8080"
+  - name: AZURE_STORAGE_CONNECTION_STRING
+    valueFrom:
+      secretKeyRef:
+        name: azure-storage-secret
+        key: connection-string
 
 autoscaling:
   enabled: true
