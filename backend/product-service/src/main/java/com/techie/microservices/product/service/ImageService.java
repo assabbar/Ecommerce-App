@@ -1,5 +1,6 @@
 package com.techie.microservices.product.service;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -87,10 +88,10 @@ public class ImageService {
             // Generate unique filename
             String filename = generateFilename(base64Data);
 
-            // Upload to Azure Storage
+            // Upload to Azure Storage using BinaryData
             BlobContainerClient containerClient = getContainerClient();
             BlobClient blobClient = containerClient.getBlobClient(filename);
-            blobClient.upload(imageBytes, true);
+            blobClient.upload(BinaryData.fromBytes(imageBytes), true);
 
             log.info("Image uploaded to Azure Storage: {}", filename);
 
