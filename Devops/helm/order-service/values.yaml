@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: acrecomdev12231416.azurecr.io/order-service
+  repository: acrecomdev12241318.azurecr.io/order-service
   pullPolicy: Always
   tag: "latest"
 

@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: acrecomdev12231416.azurecr.io/product-service
+  repository: acrecomdev12241318.azurecr.io/product-service
   pullPolicy: Always
   tag: "latest"
 
