@@ -18,3 +18,9 @@ resource "azurerm_storage_account" "storage" {
     index_document = "index.html"
   }
 }
+# Storage Container for Product Images
+resource "azurerm_storage_container" "product_images" {
+  name                  = "product-images"
+  storage_account_name  = azurerm_storage_account.storage.name
+  container_access_type = "blob"
+}
