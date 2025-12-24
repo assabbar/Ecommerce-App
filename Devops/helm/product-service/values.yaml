@@ -32,7 +32,7 @@ livenessProbe:
   httpGet:
     path: /api/actuator/health/liveness
     port: 8080
-  initialDelaySeconds: 60
+  initialDelaySeconds: 90
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
@@ -41,7 +41,7 @@ readinessProbe:
   httpGet:
     path: /api/actuator/health/readiness
     port: 8080
-  initialDelaySeconds: 30
+  initialDelaySeconds: 90
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3

@@ -22,12 +22,18 @@ livenessProbe:
   httpGet:
     path: /api/actuator/health/liveness
     port: 8082
-  initialDelaySeconds: 60
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 readinessProbe:
   httpGet:
     path: /api/actuator/health/readiness
     port: 8082
-  initialDelaySeconds: 30
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: "production"
