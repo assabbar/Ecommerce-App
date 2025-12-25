@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: acrecomdev12241318.azurecr.io/inventory-service
+  repository: acrecomdev12251344.azurecr.io/inventory-service
   pullPolicy: Always
   tag: "latest"
 imagePullSecrets:
