@@ -8,7 +8,7 @@ $ProgressPreference = "SilentlyContinue"
 # Configuration
 $RESOURCE_GROUP = "rg-ecom-dev"
 $AKS_CLUSTER_NAME = "aks-ecom"
-$ACR_NAME = "acrecomdev12191331"
+$ACR_NAME = "acrecomdev12262215"
 $COSMOSDB_ACCOUNT = "cosmosecomdb"
 $COSMOSDB_DB = "ecom-mongo-db"
 $MYSQL_SERVER = "mysql-ecom"

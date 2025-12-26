@@ -1,0 +1,85 @@
+@startuml database_schema
+!define MYSQL_COLOR #4479A1
+!define MONGODB_COLOR #13ADC7
+!define COLUMN_PK #FF6B6B
+!define COLUMN_FK #FFD700
+
+title E-Commerce Platform - Database Schema (MySQL + MongoDB)
+
+package "MySQL Database" as mysql_db {
+    
+    entity "t_users\n(authentication)" as users #FFE5E5 {
+        **id** : BIGINT <<PK, AUTOINCREMENT>>
+        username : VARCHAR(255) <<UNIQUE>>
+        email : VARCHAR(255) <<UNIQUE>>
+        password : VARCHAR(255)
+        role : ENUM(user, admin)
+        enabled : BOOLEAN
+    }
+    
+    entity "t_orders\n(order-service)" as orders #FFE5E5 {
+        **id** : BIGINT <<PK, AUTOINCREMENT>>
+        order_number : VARCHAR(255)
+        user_id : BIGINT <<FK>>
+        sku_code : VARCHAR(255) <<FK>>
+        price : DECIMAL(19,2)
+        quantity : INT
+    }
+    
+    entity "t_inventory\n(inventory-service)" as inventory #FFE5E5 {
+        **id** : BIGINT <<PK, AUTOINCREMENT>>
+        sku_code : VARCHAR(255) <<UNIQUE>>
+        quantity : INT
+    }
+    
+    entity "t_notifications\n(notification-service)" as notifications #FFE5E5 {
+        **id** : BIGINT <<PK, AUTOINCREMENT>>
+        order_id : BIGINT <<FK>>
+        notification_type : VARCHAR(255)
+        status : VARCHAR(255)
+        recipient : VARCHAR(255)
+        sent_at : TIMESTAMP
+    }
+}
+
+package "MongoDB / CosmosDB" as mongodb_db {
+    
+    entity "product\n(product-service)" as products #E5F5FF {
+        **_id** : ObjectId <<PK>>
+        id : String <<UNIQUE>>
+        name : String
+        description : String
+        skuCode : String
+        price : BigDecimal
+        category : String
+        images : List[String]
+        coverImage : String
+        rating : Double
+        reviews : Integer
+        inStock : Integer
+        colors : List[String]
+        sizes : List[String]
+    }
+}
+
+' Relations
+orders "N" -- "1" users : references\nuser_id
+orders "N" -- "1" inventory : references\nskuCode
+notifications "N" -- "1" orders : references\norder_id
+
+note bottom of mysql_db
+  **MySQL Microservices**
+  
+  t_users: User authentication & profiles
+  t_orders: Order details (user, SKU, price, qty)
+  t_inventory: Product stock levels (SKU, qty)
+  t_notifications: Order notifications (email, SMS)
+end note
+
+note bottom of mongodb_db
+  **MongoDB/CosmosDB**
+  
+  product: Product catalog (name, images, pricing, attributes)
+end note
+
+@enduml

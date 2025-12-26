@@ -1,0 +1,116 @@
+
+
+
+% Police uniforme : lmodern
+\chapter{Présentation du projet}
+
+\section{Introduction}
+Le projet présente une plateforme e-commerce basée sur une architecture microservices moderne destinée à fournir une expérience d'achat scalable, résiliente et maintenable. Le frontend est développé en \textbf{Angular 18} tandis que le backend est composé de services Java utilisant \textbf{Spring Boot 3} (Java 21). L'ensemble est containerisé avec \textbf{Docker}, orchestré avec \textbf{Kubernetes} et automatisé via \textbf{Terraform} et des pipelines CI/CD. \textbf{L'application est hébergée sur Microsoft Azure, déployée dans un cluster Kubernetes (AKS) pour garantir la haute disponibilité, la sécurité et la scalabilité.}
+
+\section{Objectifs}
+- Fournir une architecture modulaire permettant l'évolution indépendante des services.
+- Assurer la haute disponibilité et la résilience via l'orchestration Kubernetes.
+- Mettre en place une chaîne CI/CD reproductible et sécurisée pour accélérer les livraisons.
+- Garantir l'observabilité complète (métriques, logs, traces) et la gestion centralisée des secrets.
+
+\section{Vue d'ensemble de l'architecture}
+Le flux de données général est le suivant :
+\begin{enumerate}
+  \item L'utilisateur navigue depuis l'interface Angular.
+  \item Les requêtes sont routées via l'API Gateway qui gère l'authentification et le routage vers les microservices.
+  \item Les microservices (product, order, inventory, notification) traitent la logique métier et communiquent éventuellement via des messages asynchrones.
+  \item La supervision collecte métriques et logs (Prometheus, Grafana, Loki) et déclenche des alertes via AlertManager.
+  \item L'infrastructure est provisionnée et versionnée via Terraform.
+\end{enumerate}
+
+\section{Cas d'utilisation}
+- Utilisateur : navigation catalogue, ajout au panier, validation de commande, suivi.
+- Administrateur : gestion des produits et stocks, surveillance des indicateurs et gestion des incidents.
+
+\section{Technologies principales}
+
+\subsection{Frontend}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+	extbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+Angular 18 & Framework principal pour le développement de l'interface utilisateur SPA, gestion du routage, des composants et de l'état. \\
+TypeScript & Langage typé pour la robustesse, la maintenabilité et la sécurité du code frontend. \\
+Tailwind CSS & Framework utilitaire pour le design responsive et la personnalisation rapide de l'UI. \\
+Karma/Jasmine & Outils de tests unitaires pour garantir la qualité du code frontend. \\
+Cypress & Tests end-to-end automatisés pour valider les parcours critiques utilisateur. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Backend}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+	extbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+Java 21 & Langage principal pour la logique métier, la performance et la sécurité. \\
+Spring Boot 3 & Framework pour la création de microservices REST, gestion de la configuration, des dépendances et de la sécurité. \\
+Spring Data JPA & Accès et mapping aux bases de données relationnelles (MySQL). \\
+Spring Data MongoDB & Accès aux données NoSQL pour certains services. \\
+Spring Security & Authentification et autorisation (JWT, rôles). \\
+Maven & Build, gestion des dépendances, packaging et exécution des tests. \\
+JUnit/Mockito & Tests unitaires et d'intégration backend. \\
+Testcontainers & Tests d'intégration avec bases de données et services réels en conteneur. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Infrastructure}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+	extbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+Docker & Containerisation des applications pour portabilité et cohérence des environnements. \\
+Kubernetes (AKS) & Orchestration, déploiement, scalabilité et gestion des microservices sur Azure. \\
+Helm & Gestion des packages Kubernetes, déploiement automatisé et versionné. \\
+Terraform & Infrastructure as Code pour provisionner et gérer toutes les ressources Azure. \\
+Azure Container Registry (ACR) & Stockage et versionnement des images Docker. \\
+Azure Key Vault & Gestion centralisée et sécurisée des secrets et credentials. \\
+Azure Storage & Stockage des fichiers statiques et images produits. \\
+MySQL Flexible Server & Base de données transactionnelle pour les commandes et l'inventaire. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Monitoring et Observabilité}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+	extbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+Prometheus & Collecte des métriques applicatives et système (scraping des endpoints Actuator). \\
+Grafana & Visualisation des métriques, création de dashboards et alerting. \\
+Loki & Centralisation et recherche des logs applicatifs structurés. \\
+Tempo & Tracing distribué pour l’analyse des performances et la corrélation des requêtes. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{CI/CD}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+	extbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+Jenkins & Orchestration des pipelines CI/CD, automatisation des builds, tests et déploiements. \\
+Docker Registry (ACR) & Stockage sécurisé des images Docker pour déploiement sur AKS. \\
+Helm charts & Déploiement automatisé et versionné des applications sur Kubernetes. \\
+SonarQube & Analyse de la qualité et de la sécurité du code. \\
+Trivy/Snyk & Scans de vulnérabilités sur les images et dépendances. \\
+\hline
+\end{tabular}
+\end{table}
+

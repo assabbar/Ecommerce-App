@@ -1,0 +1,126 @@
+
+
+
+
+% Police uniforme : lmodern
+\chapter{LlmOps \& CI/CD}
+
+\section{Pipeline CI/CD (Jenkins)}
+Résumé des étapes observées :
+\begin{enumerate}
+  \item Checkout du dépôt.
+  \item Backend : build Maven, exécution des tests unitaires et d'intégration.
+  \item Frontend : tests Angular (Karma/Jasmine) et lint.
+  \item Tests d'intégration end‑to‑end : docker-compose.test.yml pour exécuter la pile locale.
+  \item Build d'images Docker pour chaque service et push vers ACR.
+  \item Déploiement : authentification AKS puis déploiement via Helm (\texttt{helm upgrade --install --atomic}).
+  \item Post‑déploiement : validations de santé et récupération des URLs.
+\end{enumerate}
+
+\section{Scripts d'automatisation}
+Scripts pour installer CRDs Prometheus, récupérer URLs de services, initialiser AKS/AKS credentials et déployer Helm avec valeurs provenant de Key Vault.
+
+\section{Sécurité dans la chaîne de livraison}
+- Scans SCA/SAST : Snyk/Trivy/SonarQube intégrés.
+- Scans d'images au push vers ACR.
+- Gestion d'identités via comptes de service et RBAC Kubernetes.
+
+\section{Observations}
+Le pipeline est conçu pour être reproductible et sécurisé ; points à vérifier : gestion des secrets en CI, permissions minimales pour les service accounts, politique de rollback et tests de reprise.
+
+
+\section{Détails du pipeline Jenkins}
+Le pipeline principal est défini dans \texttt{Devops/jenkins/Jenkinsfile}. Il est structuré en plusieurs étapes clés, chacune jouant un rôle essentiel dans la chaîne CI/CD. Voici le détail de chaque phase :
+
+\subsection{1. Initialisation et préparation de l'environnement}
+Cette étape prépare l'environnement d'exécution du pipeline :
+\begin{itemize}
+  \item Chargement des variables d'environnement depuis \texttt{jenkins.env}.
+  \item Authentification auprès d'Azure via un Service Principal sécurisé.
+  \item Récupération des identifiants du registre de conteneurs Azure (ACR).
+  \item Configuration de \texttt{kubectl} pour interagir avec le cluster AKS.
+  \item Installation de Helm pour la gestion des déploiements Kubernetes.
+\end{itemize}
+Cette phase garantit que toutes les dépendances et accès nécessaires sont en place avant de lancer les builds et déploiements.
+
+\subsection{2. Tests unitaires et d'intégration}
+Le pipeline sépare les tests en plusieurs sous-étapes :
+\begin{itemize}
+  \item \textbf{Backend} : Compilation Maven, exécution des tests unitaires (JUnit/Mockito) et des tests d'intégration (Spring Boot Test, Testcontainers).
+  \item \textbf{Frontend} : Lancement des tests Angular avec Karma/Jasmine, ainsi que l'analyse statique (lint).
+  \item \textbf{Tests end-to-end} : Utilisation de \texttt{docker-compose.test.yml} pour démarrer l'ensemble des services dans un environnement isolé et exécuter des scénarios de bout en bout.
+\end{itemize}
+Chaque étape de test produit des rapports qui sont archivés comme artifacts Jenkins pour analyse ultérieure.
+
+\subsection{3. Construction des images Docker}
+Pour chaque microservice (backend et frontend), une image Docker est construite :
+\begin{itemize}
+  \item Utilisation de Docker multi-stage pour optimiser la taille des images.
+  \item Les images sont taguées avec le numéro de build Jenkins (\texttt{IMAGE\_TAG}) pour assurer la traçabilité.
+  \item Exemple de commande : \texttt{docker build -f product-service/Dockerfile -t $ACR\_NAME/product-service:$IMAGE\_TAG .}
+\end{itemize}
+Cette étape garantit que chaque service dispose d'une image prête à être déployée et versionnée.
+
+\subsection{4. Push des images vers Azure Container Registry (ACR)}
+Les images Docker construites sont poussées vers le registre ACR :
+\begin{itemize}
+  \item Authentification sécurisée auprès d'ACR.
+  \item Push de chaque image avec son tag unique.
+  \item Vérification de la présence des images dans le registre avant déploiement.
+\end{itemize}
+Cette phase permet de centraliser les artefacts de déploiement et de faciliter la gestion des versions.
+
+\subsection{5. Déploiement sur AKS avec Helm}
+Le déploiement s'effectue via Helm, orchestrateur de packages Kubernetes :
+\begin{itemize}
+  \item Exécution de \texttt{helm upgrade --install --atomic} pour déployer ou mettre à jour les services.
+  \item Injection dynamique des variables sensibles (secrets, URLs) depuis Azure Key Vault ou les variables Jenkins.
+  \item Activation des probes de santé (liveness/readiness) pour valider le bon fonctionnement des pods.
+  \item Utilisation de l'option \texttt{--atomic} pour garantir le rollback automatique en cas d'échec du déploiement.
+\end{itemize}
+Cette étape assure un déploiement fiable, sécurisé et automatisé sur le cluster Kubernetes.
+
+\subsection{6. Post-déploiement et vérifications}
+Après le déploiement, le pipeline effectue plusieurs contrôles :
+\begin{itemize}
+  \item Vérification de l'état des pods et des endpoints exposés.
+  \item Exécution de smoke tests (vérification des endpoints santé, création de commande de test, etc.).
+  \item Génération d'un fichier \texttt{service-urls.txt} listant les URLs des services déployés.
+  \item Archivage des rapports de tests et des artefacts de déploiement dans Jenkins.
+\end{itemize}
+Ces vérifications permettent de s'assurer que l'application est opérationnelle et que le déploiement s'est déroulé sans incident.
+
+\subsection{7. Bonnes pratiques et sécurité}
+\begin{itemize}
+  \item Utilisation d'agents Docker dédiés pour isoler les environnements de build (image Maven, image Node).
+  \item Gestion des identifiants sensibles via le store de credentials Jenkins (jamais commités dans le repo).
+  \item Génération dynamique du fichier \texttt{jenkins.env} par les scripts d'installation, référencé via \texttt{configFileProvider}.
+  \item Utilisation du cache Maven (\texttt{~/.m2}) pour accélérer les builds.
+  \item Définition de politiques de rollback automatiques et de probes de santé pour fiabiliser les déploiements.
+\end{itemize}
+L'ensemble de ces pratiques contribue à la robustesse, la sécurité et la maintenabilité de la chaîne CI/CD.
+
+\section{Terraform et gestion d'état}
+Le code Terraform est situé dans \texttt{Devops/terraform}. Observations et recommandations :
+\begin{itemize}
+  \item Le plan crée un Resource Group, ACR et AKS avec identité managée. Les fichiers clés : \texttt{main.tf}, \texttt{mysql.tf}, \texttt{keyvault_storage.tf}, \texttt{eventhubs.tf}.
+  \item Utiliser un backend distant pour l'état (Azure Storage + blob lock) au lieu de laisser \texttt{terraform.tfstate} localement; cela évite les conflits d'équipes.
+  \item Intégrer \texttt{terraform fmt} et \texttt{terraform validate} dans la pipeline et exiger une revue des plans (gitops ou approbation manuelle) avant \texttt{apply} en production.
+\end{itemize}
+
+\section{Sécurité de la chaîne de livraison}
+\begin{itemize}
+  \item Scans SCA (Snyk) et image scanning (Trivy) automatisés lors de la construction des images. Les builds qui échouent sur vulnérabilités critiques doivent être bloqués.
+  \item Rotation des secrets et intégration Key Vault via scripts (\texttt{Devops/scripts/populate-keyvault.*}).
+  \item Principe du moindre privilège pour les service principals et comptes Jenkins (AcrPull, Reader minimal, role assignments limités).
+\end{itemize}
+
+\section{Observabilité et vérifications post-déploiement}
+Après déploiement :
+\begin{itemize}
+  \item Vérifier l'état des pods (liveness/readiness), endpoints exposés et logs initiaux.
+  \item Valider la configuration Prometheus (ServiceMonitors) et l'adoption des CRDs avant déploiement du monitoring stack.
+  \item Exécuter smoke tests (endpoints santé, requête GET catalogue, création commande de test).
+\end{itemize}
+
+

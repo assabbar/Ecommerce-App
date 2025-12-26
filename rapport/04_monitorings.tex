@@ -1,0 +1,30 @@
+
+
+
+
+% Police uniforme : lmodern
+\chapter{Monitoring et Observabilité}
+
+\section{But}
+Assurer visibilité, détection d'incidents et capacité à diagnostiquer rapidement (métriques, logs, traces).
+
+\section{Composants déployés}
+- \textbf{Prometheus} : collecte des métriques (scrape des endpoints actuator des services).
+- \textbf{Grafana} : dashboards métiers et opérationnels, alerting.
+- \textbf{Loki} : centralisation des logs structurés (JSON).
+- \textbf{Tempo} (optionnel) : traces distribuées.
+
+\section{Configuration observée}
+Le dépôt inclut une configuration Prometheus qui scrape les endpoints exposés par les services (API Gateway, product, order, inventory, notification). Les intervalles et rétentions sont adaptés pour l'environnement (tests locaux vs production).
+
+\section{Dashboards et alertes}
+Exemples de dashboards : santé du cluster (CPU/mémoire), performance API (p50/p95/p99), KPI métier (commandes/heure). Règles d'alerte : pod down, latence p99 excessive, erreurs 5xx élevées, DB pool exhausted. Les alertes sont routées vers Slack, email, et PagerDuty.
+
+\section{Logs et corrélation}
+- Logs JSON standardisés : timestamp, niveau, service, pod, trace\_id.
+- Corrélation métriques ↔ logs ↔ traces via trace_id/span_id pour faciliter les RCA.
+
+\section{Tests et validation}
+- Tests d'alerte : simulation d'augmentation d'erreurs, perte de service, latence DB.
+- Vérification des notifications (Slack/email) et des runbooks.
+

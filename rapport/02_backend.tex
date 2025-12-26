@@ -1,0 +1,279 @@
+
+% Police uniforme : lmodern
+\chapter{Backend}
+
+\section{Stack Technique}
+
+
+\begin{itemize}
+	\item \textbf{Java 21}~: Langage principal du backend, apporte performance, sécurité et compatibilité avec les frameworks modernes.
+	\item \textbf{Spring Boot 3.2+}~: Framework principal pour créer des microservices REST, facilite la configuration, l’injection de dépendances et l’exposition d’APIs robustes.
+	\item \textbf{Spring Cloud}~: Fournit des outils pour la configuration centralisée, la découverte de services (Eureka), la gestion de la résilience (circuit breaker) et la communication inter-services.
+	\item \textbf{Spring Data JPA/MongoDB}~: Simplifie l’accès aux bases de données relationnelles (MySQL) et NoSQL (MongoDB), gère le mapping objet-relationnel et les requêtes complexes.
+	\item \textbf{Spring Security}~: Assure l’authentification (JWT) et l’autorisation (rôles, droits d’accès) sur toutes les APIs.
+	\item \textbf{Spring Validation}~: Permet de valider les entrées utilisateurs et les objets métiers pour garantir l’intégrité des données.
+	\item \textbf{Maven 3.9+}~: Outil de build et de gestion des dépendances, utilisé pour compiler, tester et packager les microservices.
+	\item \textbf{Kubernetes}~: Orchestrateur de conteneurs, déploie et gère automatiquement les microservices sur le cloud Azure (AKS).
+	\item \textbf{Docker}~: Permet la containerisation des applications pour garantir la portabilité et la cohérence entre les environnements.
+	\item \textbf{SLF4J + Logback}~: Bibliothèques de logging pour la journalisation structurée et la traçabilité des événements applicatifs.
+	\item \textbf{Jackson}~: Bibliothèque de sérialisation/désérialisation JSON, utilisée pour les échanges de données entre services et avec le frontend.
+\end{itemize}
+
+\section{Configuration Spring}
+
+\subsection{Application.yml}
+Profils : dev, staging, prod. Database configuration : URL, credentials (from Key Vault via env vars), pool size (HikariCP), timeout, retry policy. Server port 8080. Logging level INFO (DEBUG dev). JWT secret (from Key Vault). Actuator endpoints /actuator/health/live, /actuator/health/readiness.
+
+\subsection{Spring Security}
+
+Spring Security assure la protection des APIs et la gestion des accès dans l’ensemble du backend. Les principaux mécanismes mis en place sont :
+\begin{itemize}
+	\item \textbf{Filtre d’authentification JWT personnalisé} : chaque requête entrante passe par un filtre qui vérifie la présence et la validité d’un token JWT. Cela permet de garantir que seuls les utilisateurs authentifiés peuvent accéder aux ressources protégées.
+	\item \textbf{Autorisation basée sur les rôles (ADMIN, USER)} : les endpoints sont sécurisés selon le rôle de l’utilisateur. Par exemple, certaines opérations (création, suppression) sont réservées aux administrateurs.
+	\item \textbf{Configuration CORS restreinte à l’API Gateway} : seules les requêtes provenant du domaine de l’API Gateway sont acceptées, ce qui limite les risques d’attaques cross-origin.
+	\item \textbf{CSRF désactivé (stateless JWT)} : comme l’authentification repose sur des tokens JWT et non sur des sessions, la protection CSRF est désactivée pour simplifier la gestion des requêtes et éviter les faux positifs.
+	\item \textbf{Encodage des mots de passe avec bcrypt (force 12)} : tous les mots de passe sont stockés de façon sécurisée grâce à l’algorithme bcrypt avec un facteur de complexité élevé, ce qui protège contre les attaques par force brute.
+	\item \textbf{Contexte de sécurité par requête (thread-local)} : chaque requête dispose de son propre contexte de sécurité, isolé des autres, pour garantir la confidentialité et l’intégrité des données utilisateur.
+\end{itemize}
+
+\subsection{JPA Configuration}
+Hibernate dialect MySQL8Dialect (CosmosDB Mongo dialect optionnel). DDL mode validate (schema pre-created). Lazy loading LAZY collections. Batch size 20 inserts/updates. Statistics optionnel (dev logging).
+
+\section{API Gateway Service}
+\subsection{Présentation générale}
+Le service API Gateway constitue le point d'entrée unique pour toutes les requêtes clients. Il a pour rôle principal la gestion de l'authentification, du routage, de la sécurisation des endpoints et de la mise en place de politiques transverses (rate limiting, logging, traçage). Le Gateway implémente des filtres et des policies pour enrichir les requêtes (injection de headers, vérification JWT) et centraliser la gestion des erreurs et des retraits (circuit breaker).
+
+\subsection{Fonctionnalités principales}
+\begin{itemize}
+	\item Routage dynamique vers les microservices (products, orders, inventory, notifications).
+	\item Authentification et validation des tokens JWT.
+	\item Application de politiques de sécurité (CORS, rate limiting, IP allowlist).
+	\item Collecte des métriques et propagation des traces pour l'observabilité.
+	\item Fallbacks et réponses standardisées en cas d'erreur upstream.
+\end{itemize}
+
+\subsection{Endpoints}
+GET /api/health (public, no auth). GET /api/routes (public, list services). POST /api/auth/login (email, password). POST /api/auth/register (email, password, name). POST /api/auth/refresh (JWT refresh token).
+
+\subsection{Routing Rules}
+/api/products/* → ProductService:8081. /api/orders/* → OrderService:8082. /api/inventory/* → InventoryService:8083. /api/notifications/* → NotificationService:8084. Load balancing round-robin Kubernetes Service. Timeout 30s per request. Retry logic 3 attempts transient errors.
+
+\subsection{Rate Limiting}
+Per user per IP : 100 requests/min. Per endpoint : /api/auth/login 5 attempts/min (brute force protection).429 Too Many Requests response.
+
+\subsection{Circuit Breaker}
+Hystrix/Resilience4j : trip circuit si 50\% requests fail 5 successive calls. Timeout default 3s per service call. Fallback response optionnel.
+
+\section{Product Service}
+\subsection{Présentation générale}
+Le Product Service gère le catalogue produit et toutes les données associées (descriptions, prix, images, catégories). Il est optimisé pour des opérations de lecture fréquentes et des écritures modérées. Le service expose des APIs REST pour la consultation et la gestion des produits, et publie des événements (ProductCreated, ProductUpdated) pour notifier les autres services (indexation, cache, inventaire).
+
+\subsection{Fonctionnalités principales}
+\begin{itemize}
+	\item CRUD complet sur les produits et catégories.
+	\item Recherche filtrée et pagination, avec support des facettes.
+	\item Upload et gestion d'images via le Storage (Azure Blob).
+	\item Publication d'événements métier lors de changements produits.
+	\item Caching côté lecture pour réduire la latence (Redis optionnel).
+\end{itemize}
+
+\subsection{Endpoints}
+GET /api/products (paginated, filters). GET /api/products/:id. POST /api/products (admin only). PUT /api/products/:id (admin). DELETE /api/products/:id (admin). GET /api/products/search (keyword, filters). GET /api/categories. POST /api/categories (admin).
+
+\subsection{Entités JPA}
+Product : id (PK), name, description, price, discount\%, category\_id (FK), sku, created\_at, updated\_at, status (ACTIVE/INACTIVE). Category : id, name, description.
+
+\subsection{Repositories}
+ProductRepository extends JpaRepository\<Product, Long\>. Custom methods : findByNameContaining, findByCategoryId, findByPriceBetween. Query annotations optionnel pour complex queries.
+
+\subsection{Services}
+ProductService : business logic CRUD, search, filtering. Validations : name not blank, price > 0, sku unique. Cache : @Cacheable on getProductById (invalidate @CacheEvict on update). Event publish ProductCreated/Updated.
+
+\section{Order Service}
+\subsection{Présentation générale}
+Le Order Service orchestre la création et le suivi des commandes. Il coordonne la vérification du panier, le calcul des totaux, la validation du paiement et l'émission d'événements asynchrones pour déclencher la réservation de stock et l'envoi de notifications. Le service est conçu pour garantir la consistance via des patterns de saga/compensation.
+
+\subsection{Fonctionnalités principales}
+\begin{itemize}
+	\item Création de commande avec validation business (prix, disponibilité).
+	\item Gestion du cycle de vie d'une commande (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED).
+	\item Intégration paiement (adapter pattern pour gateways externes).
+	\item Publication d'événements (OrderCreated, PaymentFailed) pour orchestration asynchrone.
+	\item API pour consultation historique et tracking utilisateur.
+\end{itemize}
+
+\subsection{Endpoints}
+POST /api/orders (create order, authenticated). GET /api/orders (user orders). GET /api/orders/:id (detail). PUT /api/orders/:id/status (admin). DELETE /api/orders/:id (cancel, if PENDING). GET /api/orders/:id/tracking.
+
+\subsection{Entités}
+Order : id, user\_id, order\_date, total\_amount, tax\_amount, status (PENDING/CONFIRMED/SHIPPED/DELIVERED/CANCELLED), billing\_address, shipping\_address, created\_at, updated\_at. OrderItem : id, order\_id (FK), product\_id (FK), quantity, unit\_price, subtotal. Address : street, city, zipcode, country, user\_id (FK).
+
+\subsection{Saga Pattern}
+Order creation saga : CreateOrderCommand → OrderService (validate cart, calculate total) → call InventoryService reserve stock (CompletableFuture) → if success publish OrderConfirmedEvent (Event Hubs) → if fail publish OrderFailedEvent + rollback inventory. Compensating transactions sur failure.
+
+\subsection{Validations}
+Order : total >= 0, items not empty. OrderItem : quantity > 0, unit\_price > 0. Address : no null required fields. @Validated annotation service level.
+
+\subsection{Transactions}
+@Transactional on service methods. Propagation REQUIRED. Isolation READ\_COMMITTED. Rollback on unchecked exceptions. Manual rollback optionnel.
+
+\section{Inventory Service}
+\subsection{Présentation générale}
+Le Inventory Service assure la gestion des quantités physiques et réservées. Il expose des APIs pour vérifier la disponibilité, réserver du stock lors d'une commande et libérer le stock en cas d'échec du paiement ou d'annulation. Il conserve un historique des mouvements pour l'audit et la traçabilité.
+
+\subsection{Fonctionnalités principales}
+\begin{itemize}
+	\item Consultation de l'état des stocks (on-hand, reserved, available).
+	\item Réservation atomique de quantités pour assurer la cohérence pendant la création de commande.
+	\item Mécanismes de réapprovisionnement et alertes de stock critique.
+	\item Journalisation des mouvements de stock (audit trail) pour traçabilité.
+\end{itemize}
+
+\subsection{Endpoints}
+GET /api/inventory/:product\_id (stock status). POST /api/inventory/reserve (product\_id, quantity, reference\_id). POST /api/inventory/release (reference\_id). GET /api/inventory/movements (audit trail). POST /api/inventory/restock (admin).
+
+\subsection{Entités}
+Inventory : product\_id (PK), quantity\_on\_hand, quantity\_reserved, quantity\_available (calculated). StockMovement : id, product\_id (FK), movement\_type (IN/OUT/RESERVED/RELEASED), quantity, reason, reference\_type (ORDER/MANUAL), reference\_id, created\_at.
+
+\subsection{Event Consumption}
+Consume OrderCreatedEvent → reserve stock. Consume PaymentFailedEvent → release reserved stock. Error handling dead-letter queue on processing failure.
+
+\section{Notification Service}
+\subsection{Présentation générale}
+Le Notification Service centralise l'envoi de messages aux utilisateurs (emails, webhooks, push). Il consomme les événements métiers (OrderConfirmed, OrderShipped, StockCritical) et orchestre l'envoi en s'appuyant sur adaptateurs externes (SendGrid, SMTP, services push). Il gère les templates et les politiques de retry pour garantir la remise.
+
+\subsection{Fonctionnalités principales}
+\begin{itemize}
+	\item Envoi d'emails transactionnels (confirmation commande, expédition, réinitialisation mot de passe).
+	\item Support des templates paramétrés et internationalisation.
+	\item Gestion des retries et des erreurs (backoff exponentiel, dead-letter pour notifications non remises).
+	\item API utilisateur pour lister et marquer les notifications comme lues.
+\end{itemize}
+
+\subsection{Endpoints}
+GET /api/notifications (user notifications). PUT /api/notifications/:id/read. DELETE /api/notifications/:id.
+
+\subsection{Event Consumers}
+Listen OrderConfirmedEvent → send order confirmation email (template). Listen OrderShippedEvent → send shipment notification email (with tracking#). Listen StockCriticalEvent → send admin alert.
+
+\subsection{Email Integration}
+SendGrid client (optionnel : Azure Mail). Template : order confirmation (order#, items, total), shipment (tracking URL), password reset. Retry logic exponential backoff 3 attempts. Failure logging sans blocking main process.
+
+\section{Exception Handling}
+
+\subsection{Custom Exceptions}
+EntityNotFoundException : 404 response. ValidationException : 400 response. UnauthorizedException : 401 response. ForbiddenException : 403 response. BusinessException : 422 response.
+
+\subsection{Global Exception Handler}
+@ControllerAdvice GlobalExceptionHandler. Methods @ExceptionHandler per exception type. Response : errorCode, message, timestamp, path. Logging all exceptions ERROR level.
+
+\section{Validation Framework}
+
+Bean Validation annotations : @NotBlank, @Email, @Min(1), @Size(min, max). Custom validators : @UniqueEmail, @ValidAddress. Validation groups optionnel (create vs update).
+
+\section{Data Access Patterns}
+
+
+L’accès aux données dans le backend repose principalement sur le pattern Repository, qui permet d’abstraire la logique d’accès aux bases de données. Pour chaque entité métier, un repository dédié est défini, exposant des méthodes standards telles que \texttt{save}, \texttt{findById}, \texttt{findAll} ou \texttt{deleteById}. Cette approche favorise la réutilisabilité et la clarté du code, tout en permettant l’extension par des méthodes de requête personnalisées, nommées selon les attributs recherchés (ex : \texttt{findByEmail}, \texttt{findByStatus}). La gestion de la pagination et du tri est assurée par l’utilisation de l’objet \texttt{PageRequest}, qui permet de contrôler efficacement le volume de données retourné et leur ordre d’affichage.
+
+Pour les besoins plus avancés, l’accès direct à l’Entity Manager est possible. Cela permet d’exécuter des requêtes complexes, d’utiliser des requêtes nommées (\texttt{@NamedQuery}) ou encore de recourir à des requêtes SQL natives lorsque les fonctionnalités du repository ne suffisent pas. Cette flexibilité garantit que même les scénarios d’accès aux données les plus exigeants peuvent être couverts sans compromettre la maintenabilité du code.
+
+\section{Asynchronous Processing}
+
+Le traitement asynchrone est largement utilisé pour améliorer la réactivité et la scalabilité des microservices. Les méthodes annotées avec \texttt{@Async} sont exécutées dans un thread séparé, ce qui permet de libérer le thread principal et d’optimiser la gestion des ressources. Le retour d’un \texttt{CompletableFuture} permet de chaîner des opérations et de gérer les résultats de façon non bloquante. Un pool de threads dédié est configuré pour contrôler le parallélisme et éviter la saturation du système. Des mécanismes de gestion des délais (timeout) et de rappel en cas d’erreur (error callback) sont également mis en place pour garantir la robustesse des traitements asynchrones.
+
+\section{Caching Strategy}
+
+La stratégie de cache vise à optimiser les performances et à réduire la charge sur les bases de données. L’annotation \texttt{@Cacheable} est utilisée pour mettre en cache les résultats des requêtes fréquentes, comme la récupération d’un produit par son identifiant, avec une durée de vie (TTL) de 10 minutes. Lorsqu’une mise à jour ou une suppression intervient, l’annotation \texttt{@CacheEvict} permet d’invalider le cache concerné afin de garantir la cohérence des données. L’annotation \texttt{@CachePut} est employée lors de l’insertion de nouveaux éléments pour les ajouter directement au cache. Pour les environnements distribués, l’intégration de Redis permet de partager le cache entre plusieurs instances de microservices, assurant ainsi une scalabilité horizontale et une haute disponibilité.
+
+\section{Logging \& Monitoring}
+
+La supervision et la traçabilité des applications sont assurées par une stratégie de logging et de monitoring avancée. Les logs sont produits au format JSON structuré grâce à SLF4J et Logback, ce qui facilite leur centralisation et leur analyse par des outils comme Loki. Chaque log contient des informations détaillées telles que le timestamp, le niveau de gravité, le service concerné, le pod d’exécution, les identifiants de trace et de span (pour la corrélation distribuée), l’identifiant utilisateur, le message et, en cas d’erreur, la stack trace complète. L’utilisation du Mapped Diagnostic Context (MDC) permet d’enrichir dynamiquement les logs avec des informations contextuelles. Côté monitoring, Micrometer expose des métriques détaillées sur les requêtes HTTP (nombre, latence), les requêtes base de données (nombre, durée) et l’efficacité du cache (hits/misses), permettant une observabilité fine et proactive du système.
+
+\section{Build, Containerisation et Déploiement}
+Le cycle de vie des microservices backend s’appuie sur une chaîne d’outils moderne et automatisée. La compilation, l’exécution des tests et le packaging sont réalisés avec Maven, qui garantit la reproductibilité des builds et la gestion efficace des dépendances. Chaque service dispose de son propre Dockerfile, conçu selon le principe du multi-stage build : la compilation s’effectue dans une image JDK légère, puis l’exécutable est transféré dans une image JRE minimale pour optimiser la taille et la sécurité des conteneurs.
+
+Lors de l’intégration continue, le Maven Wrapper et le cache du repository local sont utilisés pour accélérer les builds et limiter la consommation de bande passante. Les images Docker générées sont systématiquement taguées avec le numéro de build Jenkins, assurant ainsi la traçabilité et la possibilité de rollback. Enfin, chaque service expose des endpoints Actuator (/actuator/metrics, /actuator/health) qui facilitent l’orchestration, le monitoring et l’intégration avec les outils de supervision du cluster Kubernetes.
+
+
+\section{Base de données et Migrations}
+
+Le backend utilise principalement MySQL (relationnel) et CosmosDB/MongoDB (NoSQL) pour la persistance des données. Les migrations sont gérées par Flyway (fichiers \texttt{src/main/resources/db/migration/}).
+
+	extbf{Tables principales MySQL~:}
+\begin{itemize}
+	\item \textbf{t\_users}~: Stocke les informations d'authentification et de profil utilisateur (\texttt{id}, \texttt{username}, \texttt{email}, \texttt{password}, \texttt{role}, \texttt{enabled}). Cette table est centrale pour la gestion des utilisateurs et la sécurité. Elle est liée à \texttt{t\_orders} via la colonne \texttt{user\_id} (relation N:1, un utilisateur peut avoir plusieurs commandes).
+	\item \textbf{t\_orders}~: Détaille les commandes passées (\texttt{id}, \texttt{order\_number}, \texttt{user\_id}, \texttt{sku\_code}, \texttt{price}, \texttt{quantity}). Chaque commande référence un utilisateur et un produit en stock.
+	\item \textbf{t\_inventory}~: Gère le stock des produits (\texttt{id}, \texttt{sku\_code}, \texttt{quantity}).
+	\item \textbf{t\_notifications}~: Historise les notifications envoyées (\texttt{id}, \texttt{order\_id}, \texttt{notification\_type}, \texttt{status}, \texttt{recipient}, \texttt{sent\_at}). Chaque notification est liée à une commande.
+\end{itemize}
+
+	extbf{Relations principales~:}
+\begin{itemize}
+	\item \texttt{t\_orders.user\_id} $\rightarrow$ \texttt{t\_users.id} (N:1)
+	\item \texttt{t\_orders.sku\_code} $\rightarrow$ \texttt{t\_inventory.sku\_code} (N:1)
+	\item \texttt{t\_notifications.order\_id} $\rightarrow$ \texttt{t\_orders.id} (N:1)
+\end{itemize}
+
+	extbf{Collection principale MongoDB~:}
+\begin{itemize}
+	\item \textbf{product}~: Catalogue produit (\texttt{_id}, \texttt{name}, \texttt{description}, \texttt{skuCode}, \texttt{price}, \texttt{category}, \texttt{images}, ...).
+\end{itemize}
+
+Recommandations~: sauvegardes régulières (point-in-time), surveillance du stockage, tests de restauration automatisés.
+
+
+\section{API Contracts et Exemples}
+Les endpoints exposent des contrats REST/JSON. Exemple simplifié de création de commande :
+\begin{verbatim}
+POST /api/orders
+{
+	"userId": 123,
+	"items": [{"productId": "abc", "quantity": 2}],
+	"paymentMethod": "card"
+}
+\end{verbatim}
+
+Réponses : code 201 + payload contenant l'id de commande et le statut initial (PENDING).
+
+
+\section{Pattern de Résilience et Communication Asynchrone}
+Le projet implémente plusieurs patterns de résilience :
+\begin{itemize}
+	\item Circuit Breaker (Resilience4j) pour isoler dépendances défaillantes.
+	\item Retry avec backoff exponentiel pour appels réseau transitoires.
+	\item Timeout et fallbacks au niveau des clients HTTP.
+\end{itemize}
+
+Pour l'intégration asynchrone, \textbf{Event Hubs / Kafka} est utilisé pour publier des événements métiers (OrderCreated, OrderConfirmed, StockReserved). Les consommateurs gèrent la compensation (saga) en cas d'échec transactionnel.
+
+
+\section{Tests - stratégie étendue}
+\begin{itemize}
+	\item \textbf{Unitaires (JUnit/Mockito)} : tests isolés pour services, validateurs et utilitaires.
+	\item \textbf{Intégration (Spring Boot Test / Testcontainers)} : démarrage de slices applicatives et dépendances (MySQL, MongoDB) via Testcontainers.
+	\item \textbf{Contract Tests (Spring Cloud Contract)} : stubs pour garantir compatibilité entre services (ex : api-gateway ↔ product-service).
+	\item \textbf{End-to-end} : scénarios avec l'environnement Docker Compose utilisé par Jenkins pour valider flux critiques (checkout → payment → notification).
+\end{itemize}
+
+\section{Sécurité spécifique au backend}
+- JWT validation via filtros Spring Security, vérification signatures RS256.
+- Limitation rate-limiting au niveau de l'API Gateway pour protéger endpoints critiques.
+- Vérification des inputs via Bean Validation et DTOs immuables pour prévenir injection.
+
+\section{Instrumentation et Observabilité applicative}
+Chaque service publie :
+\begin{itemize}
+	\item métriques Micrometer (http.server.requests, jdbc.connections.active),
+	\item traces (si Tempo/Jaeger activé) via headers W3C TraceContext,
+	\item logs structurés envoyés à Loki via \texttt{loki-logback-appender}.
+\end{itemize}
+
+\section{Performances et scalabilité}
+Recommandations pratiques :
+\begin{itemize}
+	\item Taille initiale du pool Hikari calculée en fonction du nombre de connexions attendues et du nombre de réplicas pods.
+	\item Autoscaling Horizontal (HPA) configuré sur métriques CPU et custom metrics (http queue length).
+	\item Tests de charge (k6, Gatling) sur endpoints critiques, seuils d'alerte p95/p99 définis dans Grafana.
+\end{itemize}
+

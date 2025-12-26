@@ -1,0 +1,100 @@
+@startuml azure_complete_architecture
+!define RG_COLOR #0078D4
+!define COMPUTE_COLOR #107C10
+!define DATA_COLOR #FFB900
+!define STORAGE_COLOR #004B50
+!define SERVICE_COLOR #B8E6F0
+!define SECURITY_COLOR #D13438
+!define NETWORK_COLOR #00A4EF
+!define POD_COLOR #FFE6CC
+
+title Azure Infrastructure & Kubernetes - E-Commerce Complete Architecture
+
+package "Resource Group: rg-ecom-dev (eastus)" as rg #RG_COLOR {
+    
+    ' ===================== CONTAINER & COMPUTE =====================
+    package "Container & Compute Layer" as compute {
+        
+        component "Azure Container Registry\n(ACR - Basic SKU)" as acr #COMPUTE_COLOR
+        
+        package "Azure Kubernetes Service\n(AKS: aks-ecom - 2 nodes)" as aks_full #COMPUTE_COLOR {
+            
+            component "Control Plane" as control_plane
+            
+            package "backend namespace" as backend_ns #POD_COLOR {
+                component "api-gateway\n(LoadBalancer 8080)" as apigw
+                component "product-service\n(ClusterIP 8001)" as prod_svc
+                component "order-service\n(ClusterIP 8002)" as order_svc
+                component "inventory-service\n(ClusterIP 8003)" as inv_svc
+                component "notification-service\n(ClusterIP 8004)" as notif_svc
+            }
+            
+            package "frontend namespace" as frontend_ns #SERVICE_COLOR {
+                component "angular-app\n(Angular 18)" as angular_app
+                component "Ingress NGINX" as ingress
+            }
+            
+            control_plane --> backend_ns
+            control_plane --> frontend_ns
+            ingress --> apigw
+            ingress --> angular_app
+        }
+    }
+    
+    ' ===================== DATA & STORAGE LAYER =====================
+    package "Data & Storage Layer" as data {
+        component "MySQL Flexible Server\n(B_Standard_B2s)" as mysql #DATA_COLOR
+        component "Cosmos DB MongoDB\n(Standard)" as cosmosdb #DATA_COLOR
+        component "Storage Account\n(LRS)" as storage #STORAGE_COLOR
+    }
+    
+    ' ===================== MESSAGING & EVENTS =====================
+    package "Messaging & Events" as messaging {
+        component "Event Hubs\n(eh-ecom - Standard)" as eventhub #00A4EF
+    }
+    
+    ' ===================== SECURITY & NETWORKING =====================
+    package "Security & Networking" as security_net {
+        component "Azure Key Vault\n(kv-ecom)" as keyvault #SECURITY_COLOR
+        component "Virtual Network\n(10.0.0.0/16)" as vnet #NETWORK_COLOR
+    }
+    
+    ' Connexions principales
+    acr --> aks_full
+    
+    apigw --> mysql
+    apigw --> cosmosdb
+    apigw --> storage
+    apigw --> keyvault
+    
+    prod_svc --> cosmosdb
+    prod_svc --> keyvault
+    
+    order_svc --> mysql
+    order_svc --> eventhub
+    order_svc --> keyvault
+    
+    inv_svc --> mysql
+    inv_svc --> keyvault
+    
+    notif_svc --> eventhub
+    notif_svc --> keyvault
+    
+    aks_full --> vnet
+    aks_full --> keyvault
+}
+
+note right of rg
+  **Azure Infrastructure Summary**
+  Location: eastus | Tags: {project: ecom, env: dev}
+  
+  **9 Resources:** ACR | AKS | MySQL | Cosmos DB | Storage | Event Hubs | Key Vault | VNet | NSG
+  
+  **Kubernetes Namespaces:**
+  • backend: api-gateway + 4 microservices
+  • frontend: Angular app + Ingress
+  
+  **Provisioning:** Terraform (10-15 min)
+end note
+
+@enduml

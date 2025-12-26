@@ -1,0 +1,124 @@
+@startuml devops_complete_process
+!define DEVELOPER_COLOR #FFD700
+!define VCS_COLOR #FF6B6B
+!define JENKINS_COLOR #D24939
+!define ACR_COLOR #0DB7ED
+!define TERRAFORM_COLOR #623CE4
+!define AZURE_COLOR #0078D4
+!define KUBERNETES_COLOR #326CE5
+!define DATABASE_COLOR #13ADC7
+!define HELM_COLOR #0F1419
+
+title Architecture DevOps E-Commerce - Code Push to Production
+
+' Developer & Version Control
+package "Developer & Version Control" as dev_layer {
+    component "👨‍💻 Developer\nWorkstation" as dev_ws #DEVELOPER_COLOR
+    component "🐙 GitHub\nRepository" as github #VCS_COLOR
+    dev_ws --> github : Push code\n(app + terraform)
+}
+
+' CI/CD & Docker - Combined with Jenkins Logo
+package "CI/CD Pipeline & Containerization (Jenkins)" as cicd_layer #JENKINS_COLOR {
+    component "🔨 Build\n(Maven + npm)" as build_all
+    component "✅ Test &\nScan\n(SonarQube, Trivy)" as test_scan
+    component "🐳 Docker Build\n& Push" as docker_push
+    
+    github --> build_all : Webhook
+    build_all --> test_scan
+    test_scan --> docker_push
+}
+
+' Registry
+component "📦 Azure Container\nRegistry (ACR)" as acr #ACR_COLOR
+
+docker_push --> acr : docker push\n(5 images)
+
+' Infrastructure - Terraform
+package "Infrastructure as Code (Terraform)" as iac_layer #TERRAFORM_COLOR {
+    component "🏗️  Provision\nAzure Resources" as terraform
+    
+    github --> terraform : IaC code\n(*.tf files)
+}
+
+' Cloud Provider - Azure
+package "Azure Cloud Resources" as azure_layer #AZURE_COLOR {
+    component "📡 Resource\nGroup\nrg-ecom-dev" as rg
+    component "🔗 Virtual\nNetwork\n10.0.0.0/16" as vnet
+    component "☸️  AKS\nCluster\naks-ecom" as aks_cluster
+    component "🗄️  MySQL\nFlexible\nServer" as mysql
+    component "📊 Cosmos DB\n(MongoDB\nAPI)" as cosmosdb
+    component "🔐 Key\nVault" as keyvault
+    
+    terraform --> rg : Create
+    rg --> vnet
+    rg --> aks_cluster
+    rg --> mysql
+    rg --> cosmosdb
+    rg --> keyvault
+}
+
+' Kubernetes - Simple with 2 Namespaces
+package "Kubernetes (AKS) - aks-ecom" as k8s_layer #KUBERNETES_COLOR {
+    
+    component "backend\nNamespace\n(Microservices)" as backend_ns {
+        component "api-gateway" as apigw
+        component "product-service" as prod_svc
+        component "order-service" as order_svc
+        component "inventory-service" as inv_svc
+        component "notification-service" as notif_svc
+    }
+    
+    component "frontend\nNamespace\n(Web App)" as frontend_ns {
+        component "angular-app" as angular_app
+    }
+}
+
+' Helm Deployment
+package "Deployment & Orchestration (Helm)" as helm_layer #HELM_COLOR {
+    component "⛵ Helm Charts\nDeployment" as helm_deploy
+}
+
+acr --> k8s_layer : Pull images
+helm_deploy --> backend_ns : Deploy microservices
+helm_deploy --> frontend_ns : Deploy frontend
+aks_cluster -.-> k8s_layer : Host cluster
+
+' Data Connections
+backend_ns --> mysql : JDBC
+backend_ns --> cosmosdb : MongoDB
+backend_ns -.-> keyvault : Secrets
+
+' Feedback to Developer
+angular_app --> dev_ws : ✅ Deployment Complete
+
+note bottom of cicd_layer
+  **Jenkins Pipeline**
+  1. Checkout & Build (Maven + npm)
+  2. Test & Security Scan (JUnit, SonarQube, Trivy)
+  3. Docker Build & Push to ACR
+  Total Time: 20-25 minutes
+end note
+
+note bottom of azure_layer
+  **6 Azure Resources**
+  • Resource Group: rg-ecom-dev
+  • VNet: 10.0.0.0/16
+  • AKS: aks-ecom (2 nodes)
+  • MySQL: Flexible Server
+  • Cosmos DB: MongoDB API
+  • Key Vault: Secrets storage
+  
+  Provisioned via Terraform
+  Time: 10-15 minutes
+end note
+
+note bottom of k8s_layer
+  **2 Active Namespaces**
+  • backend: 5 microservices
+  • frontend: Angular application
+  
+  Deployment via Helm Charts
+end note
+
+@enduml

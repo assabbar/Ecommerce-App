@@ -1,0 +1,86 @@
+\appendix
+
+\chapter{Références et Commandes Utiles}
+
+\section{Kubernetes}
+
+\begin{verbatim}
+kubectl get pods -n backend
+kubectl describe pod <pod-name> -n backend
+kubectl logs <pod-name> -n backend
+kubectl port-forward svc/api-gateway 8080:8080 -n backend
+\end{verbatim}
+
+\section{Helm}
+
+\begin{verbatim}
+helm list -n backend
+helm upgrade <release> ./chart -n backend
+helm rollback <release> <revision> -n backend
+\end{verbatim}
+
+\section{Azure CLI}
+
+\begin{verbatim}
+az aks get-credentials --resource-group rg-ecom-dev --name aks-ecom
+az acr login --name acrecomdev
+\end{verbatim}
+
+\section{Terraform}
+
+\begin{verbatim}
+terraform plan
+terraform apply
+terraform destroy
+\end{verbatim}
+
+\chapter{Architecture Générale}
+
+Microservices Java/Spring Boot sur AKS.
+
+Frontend Angular.
+
+Données : MySQL + CosmosDB.
+
+Async : Event Hubs.
+
+Monitoring : Prometheus + Grafana + Loki.
+
+CI/CD : Jenkins → Docker → ACR → Helm → AKS.
+
+Sécurité : Key Vault, TLS, RBAC, scans CVE.
+
+\chapter{Fichiers de configuration importants}
+Liste non exhaustive des fichiers de configuration à consulter dans le dépôt :
+\begin{itemize}
+	\item \texttt{backend/pom.xml} (parent POM)
+	\item \texttt{backend/api-gateway/pom.xml}
+	\item \texttt{backend/product-service/pom.xml}
+	\item \texttt{backend/order-service/pom.xml}
+	\item \texttt{backend/*/Dockerfile} (Dockerfiles par service)
+	\item \texttt{frontend/package.json}, \texttt{frontend/angular.json}
+	\item \texttt{Devops/terraform/main.tf}, \texttt{Devops/terraform/mysql.tf}, \texttt{Devops/terraform/keyvault_storage.tf}, \texttt{Devops/terraform/eventhubs.tf}
+	\item \texttt{Devops/jenkins/Jenkinsfile}
+	\item \texttt{Devops/jenkins/docker-compose.test.yml}
+	\item \texttt{Devops/scripts/setup-azure-jenkins.sh} et \texttt{Devops/scripts/populate-keyvault.*}
+	\item \texttt{docker-compose.yml} (pile locale)
+	\item \texttt{monitoring/} (dashboards, prometheus rules si présents)
+	\item \texttt{rapport/} (fichiers LaTeX et templates à livrer)
+\end{itemize}
+
+\chapter{Commandes utiles (récapitulatif)}
+\begin{verbatim}
+# Build backend services (local)
+mvn -pl backend/product-service clean package
+
+# Run tests (Jenkins uses CI images)
+mvn -f backend/pom.xml test
+
+# Terraform plan
+cd Devops/terraform
+terraform init
+terraform plan
+
+# Jenkins (local) - validate setup
+bash Devops/jenkins/validate-setup.sh
+\end{verbatim}

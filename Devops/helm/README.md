@@ -91,14 +91,14 @@ Pour déployer un service spécifique:
 # Example: product-service
 helm upgrade --install product-service ./Devops/helm/product-service \
   --namespace backend \
-  --set image.repository=acrecomdev12161808.azurecr.io/product-service \
+  --set image.repository=acrecomdev12262215.azurecr.io/product-service \
   --set image.tag=latest \
   --wait
 
 # Example: frontend
 helm upgrade --install frontend ./Devops/helm/frontend \
   --namespace frontend \
-  --set image.repository=acrecomdev12161808.azurecr.io/frontend \
+  --set image.repository=acrecomdev12262215.azurecr.io/frontend \
   --set image.tag=latest \
   --wait
 ```
@@ -111,7 +111,7 @@ Vous pouvez personnaliser le déploiement avec des variables:
 # Bash
 export AKS_CLUSTER_NAME="aks-ecom"
 export RESOURCE_GROUP="rg-ecom-dev"
-export ACR_NAME="acrecomdev12161808"
+export ACR_NAME="acrecomdev12262215"
 export IMAGE_TAG="v1.0.0"
 
 ./Devops/scripts/deploy.sh
@@ -119,7 +119,7 @@ export IMAGE_TAG="v1.0.0"
 # PowerShell
 $env:AKS_CLUSTER_NAME="aks-ecom"
 $env:RESOURCE_GROUP="rg-ecom-dev"
-$env:ACR_NAME="acrecomdev12161808"
+$env:ACR_NAME="acrecomdev12262215"
 $env:IMAGE_TAG="v1.0.0"
 
 .\Devops\scripts\deploy.ps1
@@ -196,7 +196,7 @@ helm upgrade product-service ./Devops/helm/product-service \
 
 # Méthode 2: Via kubectl
 kubectl set image deployment/product-service \
-  product-service=acrecomdev12161808.azurecr.io/product-service:v1.2.0 \
+  product-service=acrecomdev12262215.azurecr.io/product-service:v1.2.0 \
   -n backend
 
 # Vérifier le rollout
@@ -391,10 +391,10 @@ kubectl get pod <pod-name> -n backend -o yaml
 
 ```bash
 # Vérifier le role assignment ACR → AKS
-az role assignment list --scope /subscriptions/.../acrecomdev12161808
+az role assignment list --scope /subscriptions/.../acrecomdev12262215
 
 # Vérifier si l'image existe
-az acr repository show-tags --name acrecomdev12161808 --repository product-service
+az acr repository show-tags --name acrecomdev12262215 --repository product-service
 ```
 
 ### Service non accessible

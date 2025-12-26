@@ -1,0 +1,120 @@
+
+
+\documentclass[12pt,a4paper]{report}
+
+
+% Page de garde adaptée au projet E-Commerce DevOps
+\usepackage[utf8]{inputenc}
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+    \vspace*{1cm}
+    \begin{minipage}{1\textwidth}
+        \usepackage[utf8]{inputenc}
+        \usepackage[T1]{fontenc}
+        \usepackage{lmodern}
+        \usepackage{graphicx}
+        \usepackage{hyperref}
+        \usepackage{listings}
+        \usepackage{xcolor}
+        \usepackage{geometry}
+        \usepackage{float}
+        \usepackage{amsmath}
+        \usepackage{amssymb}
+        \usepackage{enumitem}
+        \usepackage{newunicodechar}
+        \centering
+        % Gestion des caractères Unicode courants
+        \newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+        \newunicodechar{#}{\#}
+        \vspace{1cm}
+        % Marges
+        \geometry{
+         a4paper,
+         total={170mm,257mm},
+         left=20mm,
+         top=20mm,
+        }
+        {\Huge \textbf{Plateforme E-Commerce DevOps}}
+        % Style listings
+        \definecolor{codegreen}{rgb}{0,0.6,0}
+        \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+        \definecolor{codepurple}{rgb}{0.58,0,0.82}
+        \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+        \vspace{1cm}
+        \lstdefinestyle{mystyle}{
+            backgroundcolor=\color{backcolour},   
+            commentstyle=\color{codegreen},
+            keywordstyle=\color{magenta},
+            numberstyle=\tiny\color{codegray},
+            stringstyle=\color{codepurple},
+            basicstyle=\ttfamily\footnotesize,
+            breakatwhitespace=false,         
+            breaklines=true,                 
+            captionpos=b,                    
+            keepspaces=true,                 
+            numbers=left,                    
+            numbersep=5pt,                  
+            showspaces=false,                
+            showstringspaces=false,
+            showtabs=false,                  
+            tabsize=2
+        }
+        \lstset{style=mystyle}
+        
+        {\Large \textbf{Rapport Technique Complet}}
+        
+        % Logo ENSAH (adapter le chemin si besoin)
+        \vspace{1.5cm}
+        \includegraphics[width=0.18\textwidth]{imgs/ENSAH.png}
+        \vspace{2cm}
+        
+        {\large Réalisé par : \textbf{Malak ASSABBAR}}
+        
+        {\large Encadré par : Pr. Bahiri}
+        
+        \vspace{1cm}
+        {\large École Nationale des Sciences Appliquées d'Al Hoceima (ENSAH)}
+        \\
+        {\large Année universitaire : 2025/2026}
+    \end{minipage}
+\end{center}
+\end{titlepage}
+
+\newpage
+
+    ableofcontents
+\newpage
+
+\input{01_overview}
+\input{02_backend}
+\input{03_frontend}
+\input{04_monitorings}
+\input{05_infrastructure}
+\input{06_devops}
+\input{07_securite}
+% --- Conclusion CI/CD adaptée au projet ---
+        	ableofcontents
+        \newpage
+La mise en place d'une chaîne CI/CD complète avec Jenkins constitue un pilier fondamental de cette plateforme e-commerce. Le pipeline orchestre l'automatisation des tests (unitaires, d'intégration, de sécurité) pour le frontend (Angular 18) et le backend (microservices Spring Boot 3, Java 21), garantissant la qualité à chaque étape. La containerisation via Docker assure la cohérence des environnements du développement à la production. L'infrastructure as code, gérée par Terraform, permet le provisionnement automatisé et reproductible de toutes les ressources sur Azure (AKS, ACR, Key Vault, Storage, MySQL Flexible Server, etc.). Les déploiements Kubernetes sont industrialisés grâce à Helm, assurant la scalabilité, la haute disponibilité et la résilience des microservices. Le pipeline intègre également la configuration automatique d'une stack de supervision avancée (Prometheus, Grafana, Loki, Tempo, AlertManager) pour une observabilité complète et des alertes proactives. La sécurité est renforcée par la gestion centralisée des secrets (Azure Key Vault), l'automatisation des certificats SSL, l'analyse continue du code (SonarQube, Trivy) et la gestion des accès. Cette chaîne CI/CD accélère les cycles de livraison tout en assurant la robustesse, la sécurité et la fiabilité du système.
+
+\section{Innovation Technique}
+
+Ce projet se distingue par l'intégration avancée des pratiques DevOps et Cloud Native. L'architecture microservices découplée (Spring Boot, Angular) favorise l'évolutivité, la maintenabilité et le déploiement indépendant des services (product, order, inventory, notification). L'automatisation de l'infrastructure (Terraform, Helm) et des déploiements (Jenkins) permet une gestion agile et reproductible de l'ensemble du cycle de vie applicatif. L'observabilité est assurée par une stack de monitoring moderne (Prometheus, Grafana, Loki, Tempo) couvrant métriques, logs et traces distribuées. La sécurité est traitée de bout en bout : gestion des secrets, audits, scans de vulnérabilités, authentification JWT, et conformité RGPD. L'utilisation d'Azure AKS pour l'orchestration, associée à l'autoscaling, la tolérance aux pannes et le stockage distribué, garantit la résilience et la disponibilité de la plateforme. Enfin, la démarche IaC et CI/CD permet d'intégrer rapidement de nouvelles fonctionnalités tout en maintenant un haut niveau de qualité.
+
+\section{Perspectives et Évolutions Futures}
+
+Plusieurs axes d'amélioration sont identifiés pour renforcer la plateforme :
+\begin{itemize}
+    \item \textbf{Automatisation avancée} : Intégration de tests de charge automatisés, déploiement blue/green et canary pour des mises à jour sans interruption.
+    \item \textbf{Sécurité renforcée} : Mise en place d'une architecture Zero Trust, détection d'anomalies par IA, gestion centralisée des identités et conformité accrue.
+    \item \textbf{Scalabilité et performance} : Optimisation de l'autoscaling AKS, multi-région Azure pour la haute disponibilité mondiale, et cache distribué (Redis).
+    \item \textbf{Expérience utilisateur} : Ajout de fonctionnalités temps réel (WebSocket), personnalisation avancée, et intégration de modules IA pour la recommandation de produits.
+    \item \textbf{Observabilité proactive} : Détection prédictive des incidents, dashboards dynamiques, et alertes intelligentes.
+    \item \textbf{Écosystème ouvert} : Développement d'API publiques, intégration de partenaires, et ouverture à des extensions tierces.
+    \item \textbf{Gouvernance et conformité} : Traçabilité complète (audit), gestion fine des accès, automatisation des contrôles réglementaires et reporting avancé.
+\end{itemize}
+La base technique solide posée par ce projet permet d'envisager sereinement ces évolutions, avec une capacité d'innovation continue grâce à l'automatisation et à l'agilité DevOps.
+
+\end{document}

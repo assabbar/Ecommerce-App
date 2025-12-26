@@ -1,0 +1,40 @@
+
+
+
+
+% Police uniforme : lmodern
+\chapter{Application Frontend}
+
+\section{Présentation}
+L'interface utilisateur est développée en \textbf{Angular 18} et TypeScript. Elle couvre les parcours principaux : navigation catalogue, fiche produit, panier, paiement, profil utilisateur et tableau d'administration.
+
+\section{Dashboards et gestion des rôles}
+L'application frontend propose deux tableaux de bord distincts selon le type d'utilisateur connecté~:
+\begin{itemize}
+	\item \textbf{Dashboard Administrateur}~: Accessible uniquement aux utilisateurs ayant le rôle \texttt{admin}. Ce dashboard permet de gérer l'ensemble de l'application~: ajout/modification/suppression de produits, visualisation du stock en temps réel, gestion des commandes, accès à l'historique des notifications, et administration des utilisateurs. L'admin dispose d'une vue synthétique sur les métriques clés (ventes, stocks, utilisateurs actifs).
+	\item \textbf{Dashboard Utilisateur}~: Pour les clients classiques. Ce dashboard permet de parcourir le catalogue, consulter les fiches produits, ajouter au panier, passer commande et suivre l'état de ses commandes. L'utilisateur peut également gérer son profil et consulter l'historique de ses achats et notifications.
+\end{itemize}
+La navigation et l'affichage des fonctionnalités sont dynamiquement adaptés selon le rôle après authentification.
+
+\section{Organisation du projet}
+- \texttt{src/app/} : modules et routes.
+- \texttt{components/} : composants réutilisables (cart, product-card, navbar).
+- \texttt{services/} : clients API (product, order, auth, notification).
+- \texttt{guards/} : protection des routes et contrôle d'accès.
+- \texttt{environments/} : variables d'environnement (URL API, flags).
+
+\section{Authentification}
+- Authentification basée sur JWT ; le frontend doit privilégier les cookies HttpOnly pour la sécurité.
+- Intercepteur HTTP pour l'injection du token et la gestion centralisée des erreurs (401/403).
+- Guards pour protéger les routes sensibles (admin).
+
+\section{Ergonomie et accessibilité}
+- Design responsive mobile/desktop.
+- Bonnes pratiques d'accessibilité : aria‑labels, gestion du focus, contraste des couleurs.
+- Améliorations UX : chargement optimiste, indicateurs de progression et notifications utilisateur.
+
+\section{Tests}
+- Unitaires : Karma + Jasmine.
+- E2E : Cypress pour les scénarios critiques (login, achat, administration).
+- Commandes utiles : \texttt{npm test}, \texttt{npm run build}, \texttt{npm run test:e2e}.
+

@@ -1,0 +1,45 @@
+
+% Police uniforme : lmodern
+\chapter{Infrastructure Cloud}
+
+\section{Résumé}
+L'infrastructure est définie via Terraform dans \texttt{Devops/terraform} pour assurer infrastructure as code, traçabilité et réplicabilité. La cible principale est Microsoft Azure.
+
+\section{Ressources principales (extrait Terraform)}
+
+\subsection{Resource Group}
+Le resource group \texttt{rg-ecom-dev} regroupe l'ensemble des ressources Azure du projet. Il permet une gestion centralisée, la traçabilité et la suppression atomique de l'environnement.
+
+\subsection{Azure Container Registry (ACR)}
+L'ACR est utilisé pour stocker et versionner les images Docker de tous les microservices (backend, frontend). Chaque build CI/CD pousse une image taguée (ex : \texttt{product-service:build123}) dans le registre. Cela garantit la reproductibilité des déploiements et la sécurité des artefacts.
+
+\subsection{Azure Kubernetes Service (AKS)}
+Le cluster AKS orchestre le déploiement, la montée en charge et la résilience des conteneurs applicatifs. Il est configuré avec 2 nœuds (VM Standard\_D2s\_v3) pour supporter la charge de développement et de test. AKS gère l'autoscaling, le réseau, la sécurité (RBAC), et l'intégration avec ACR pour le pull d'images.
+
+\subsection{MySQL Flexible Server}
+Le serveur \texttt{mysql-ecom} héberge la base de données transactionnelle du service de commandes (order-service). Il est provisionné avec 7 jours de backup, la base \texttt{ecomdb}, et une configuration adaptée à la haute disponibilité. Les accès sont sécurisés (login admin, mot de passe stocké dans Key Vault). Les règles firewall sont ouvertes pour le développement mais doivent être restreintes en production.
+
+\subsection{Azure Key Vault}
+Le Key Vault centralise la gestion des secrets, mots de passe, et clés d'API. Il protège les informations sensibles utilisées par les applications (ex : credentials DB, secrets JWT, clés d'API externes). L'accès est contrôlé par RBAC Azure et la soft delete est activée pour la récupération en cas de suppression accidentelle.
+
+\subsection{Azure Storage Account}
+Le compte de stockage \texttt{stgecomdev} héberge les fichiers statiques et les images produits uploadées via le frontend. Le conteneur \texttt{product-images} est utilisé par le Product Service pour stocker et servir les images associées aux produits. L'accès se fait via des URLs sécurisées et le stockage est répliqué pour la durabilité.
+
+\subsection{Réseau et Sécurité}
+Le cluster AKS utilise Azure CNI pour l'intégration réseau, avec un load balancer standard pour exposer les services. Le rôle \texttt{AcrPull} est attribué au kubelet pour autoriser le téléchargement des images depuis l'ACR. Les secrets sont injectés dans les pods via CSI driver recommandé. Le firewall MySQL est ouvert pour les tests mais doit être restreint à des IPs de confiance en production.
+
+\section{Réseau et sécurité}
+- AKS configuré avec Azure CNI et load balancer standard.
+- Rôle \texttt{AcrPull} attribué au kubelet pour pull d'images ACR.
+- Firewall MySQL ouvert pour tests (à restreindre en production).
+- Secrets gérés via Key Vault, injection via CSI driver recommandée.
+
+\section{Provisioning et workflow}
+- Terraform modules séparés (main.tf, mysql.tf, keyvault\_storage.tf, etc.).
+- Variables externalisées dans \texttt{terraform.tfvars} et pipeline CI réalise \texttt{terraform plan} puis \texttt{apply} après revue.
+
+\section{Recommandations opérationnelles}
+- Restreindre les règles firewall MySQL à plages IP connues.
+- Activer rotation automatique et purge protection pour Key Vault en production.
+- Compléter par Azure Monitor pour alerting natif.
+
